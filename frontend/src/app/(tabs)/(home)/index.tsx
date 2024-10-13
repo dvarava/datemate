@@ -80,11 +80,11 @@ const getNearestHoliday = (): HolidayInfo => {
     const daysLeft = calculateDaysUntilDate(targetDate);
 
     // check days to date
-    console.log(
-      `${holiday.name}:`,
-      targetDate.toDateString(),
-      `- Days left: ${daysLeft}`
-    );
+    // console.log(
+    //   `${holiday.name}:`,
+    //   targetDate.toDateString(),
+    //   `- Days left: ${daysLeft}`
+    // );
 
     if (daysLeft < nearestHoliday.daysLeft) {
       nearestHoliday = { name: holiday.name, daysLeft };
@@ -129,7 +129,7 @@ const HomeScreen = () => {
   const router = useRouter();
   const navigateBlocked = useRef(false);
   const [isNotified, setIsNotified] = useState(false);
-  const isPremium = true;
+  const isPremium = false;
 
   const handleBuyNow = () => {
     if (!navigateBlocked.current) {

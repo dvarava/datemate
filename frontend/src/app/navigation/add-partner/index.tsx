@@ -45,7 +45,16 @@ const AddPartnerScreen = () => {
   const morphOpacity = useRef(new Animated.Value(0)).current;
 
   const router = useRouter();
-  const navigation = useNavigation();
+
+  const suggestedInterests = [
+    "Music",
+    "Movies",
+    "Sports",
+    "Sushi",
+    "Nature",
+    "Dancing",
+    "Cooking",
+  ];
 
   useEffect(() => {
     morphIn();
@@ -139,7 +148,7 @@ const AddPartnerScreen = () => {
 
     if (nameLength < 2 || nameLength > 10) {
       setIsNameValid(false);
-      setNameError("Name must be between 2 and 18 letters.");
+      setNameError("Name must be between 2 and 10 letters.");
       return;
     }
 
@@ -165,6 +174,12 @@ const AddPartnerScreen = () => {
       setInputText("");
     } else {
       setInputText(text);
+    }
+  };
+
+  const handleSuggestedInterestClick = (interest: string) => {
+    if (!partnerLoves.includes(interest)) {
+      setPartnerLoves((prev) => [...prev, interest]);
     }
   };
 
@@ -416,11 +431,24 @@ const AddPartnerScreen = () => {
               <Text style={styles.errorText}>{lovesError}</Text>
             )}
             <Text style={styles.helperText}>
-              *Answer as broad as you can, following example shown below.*
+              *Answer as broad as you can, following the example shown below.*
             </Text>
             <Text style={styles.exampleText}>
               Example: Sunsets, concerts, Thai food, art, John Wick, horses.
             </Text>
+
+            {/* Suggested Interests */}
+            <View style={styles.suggestedContainer}>
+              {suggestedInterests.map((interest, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.suggestedChip}
+                  onPress={() => handleSuggestedInterestClick(interest)}
+                >
+                  <Text style={styles.suggestedChipText}>{interest}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         )}
 
@@ -624,6 +652,26 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     color: colors.primary,
     minWidth: 100,
+  },
+  suggestedContainer: {
+    marginTop: 15,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 5,
+  },
+  suggestedChip: {
+    backgroundColor: colors.selected,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 5,
+    marginVertical: 5,
+  },
+  suggestedChipText: {
+    color: colors.primary,
+    fontSize: fontSize.sm,
+    fontFamily: "Nunito-Regular",
   },
 });
 
