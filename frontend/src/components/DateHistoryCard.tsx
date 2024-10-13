@@ -9,14 +9,14 @@ import { useRouter } from "expo-router";
 
 const DateHistoryCard: React.FC<{
   history: DateHistory;
-  onFavoriteToggle: (id: string) => void;
+  onActionPress: (id: string) => void;
   isPremium: boolean;
   showAvatar?: boolean;
-}> = ({ history, onFavoriteToggle, isPremium, showAvatar = true }) => {
+  showFavorite?: boolean;
+}> = ({ history, onActionPress, isPremium, showAvatar = true, showFavorite = true }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    // Hardcoded values for now, replace with DB interaction later
     router.push({
       pathname: "/navigation/date-plan",
       params: {
@@ -42,12 +42,14 @@ const DateHistoryCard: React.FC<{
               <Text style={styles.historyDescription}>{history.dateDescription}</Text>
             </View>
 
-            <TouchableOpacity onPress={() => onFavoriteToggle(history.id)}>
+            <TouchableOpacity
+              onPress={() => onActionPress(history.id)}
+              style={!showFavorite ? styles.iconButton : undefined}
+            >
               <Ionicons
-                name={history.isFavorite ? "heart" : "heart-outline"}
-                size={30}
-                color={history.isFavorite ? colors.secondary : "#666"}
-                style={{ paddingBottom: 5 }}
+                name={showFavorite ? (history.isFavorite ? "heart" : "heart-outline") : "trash"}
+                size={showFavorite ? 28 : 20}
+                color={showFavorite ? (history.isFavorite ? colors.secondary : "#666") : colors.primary}
               />
             </TouchableOpacity>
           </View>
@@ -61,7 +63,6 @@ const DateHistoryCard: React.FC<{
                 iconSize={14}
                 lockedTextMarginRight={0}
               >
-                {/* hardcoded value for now, replace with DB interaction later */}
                 <Text style={styles.costText}>Cost: $50</Text>
               </SubscriptionGuard>
             </View>
@@ -132,6 +133,12 @@ const styles = StyleSheet.create({
   },
   avatar: {
     marginRight: 15,
+  },
+  iconButton: {
+    padding: 10,
+    backgroundColor: "#333",
+    borderRadius: 20,
+    marginLeft: 10,
   },
 });
 

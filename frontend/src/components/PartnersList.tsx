@@ -6,7 +6,6 @@ import { useRouter } from "expo-router";
 import { Profile } from "@/types/profile";
 import Avatar from "./Avatar";
 
-// Props for PartnersList
 interface PartnersListProps {
   profiles: Profile[];
   showActions?: boolean;
@@ -15,7 +14,6 @@ interface PartnersListProps {
   onSelect?: (partner: Profile) => void;
 }
 
-// Props for ProfileCard
 interface ProfileCardProps {
   profile: Profile;
   showActions?: boolean;
@@ -24,16 +22,13 @@ interface ProfileCardProps {
   onSelect?: (partner: Profile) => void;
 }
 
-// ProfileCard Component
 const ProfileCard: React.FC<ProfileCardProps> = ({ profile, showActions = true, onEdit, onDelete, onSelect }) => {
   const router = useRouter();
 
-  // Handle profile selection and navigation based on available handlers
   const handleSelect = () => {
     if (onSelect) {
-      onSelect(profile);  // Trigger onSelect if provided
+      onSelect(profile);
     } else {
-      // Navigate to partner-details page if no onSelect handler
       router.push({
         pathname: `/navigation/partner-details`,
         params: { id: profile.id, name: profile.name },
@@ -59,7 +54,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, showActions = true, 
   );
 };
 
-// PartnersList Component
 const PartnersList: React.FC<PartnersListProps> = ({ profiles, showActions = true, onEdit, onDelete, onSelect }) => {
   return (
     <FlatList
@@ -71,7 +65,7 @@ const PartnersList: React.FC<PartnersListProps> = ({ profiles, showActions = tru
           showActions={showActions}
           onEdit={onEdit}
           onDelete={onDelete}
-          onSelect={onSelect}  // Pass onSelect for selecting a partner
+          onSelect={onSelect}
         />
       )}
       contentContainerStyle={styles.profileList}
@@ -79,7 +73,6 @@ const PartnersList: React.FC<PartnersListProps> = ({ profiles, showActions = tru
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: colors.primary,

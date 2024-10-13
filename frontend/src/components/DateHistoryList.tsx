@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import DateHistoryCard from "./DateHistoryCard";
 import { DateHistory } from "@/types/dateHistory";
 
 interface DateHistoryListProps {
   histories: DateHistory[];
-  onFavoriteToggle: (id: string) => void;
+  onActionPress: (id: string) => void;
   showAvatar?: boolean;
+  showFavorite?: boolean;
 }
 
 const DateHistoryList: React.FC<DateHistoryListProps> = ({
   histories,
-  onFavoriteToggle,
-  showAvatar
+  onActionPress,
+  showAvatar = true,
+  showFavorite = true,
 }) => {
   // Placeholder for now (replace with DB value when connected)
   const isPremium = false;
@@ -23,9 +25,10 @@ const DateHistoryList: React.FC<DateHistoryListProps> = ({
         <DateHistoryCard
           key={history.id}
           history={history}
-          onFavoriteToggle={onFavoriteToggle}
+          onActionPress={onActionPress}
           isPremium={isPremium}
           showAvatar={showAvatar}
+          showFavorite={showFavorite}
         />
       ))}
     </View>

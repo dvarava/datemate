@@ -53,7 +53,8 @@ const HistoryScreen: React.FC = () => {
         <Text style={styles.header}>Generated Dates History</Text>
         <DateHistoryList
           histories={histories}
-          onFavoriteToggle={handleFavoriteToggle}
+          onActionPress={handleFavoriteToggle}
+          showFavorite={true}
         />
       </ScrollView>
     </View>
