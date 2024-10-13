@@ -53,15 +53,16 @@ const DateHistoryCard: React.FC<{
           </View>
 
           <View style={styles.bottomRow}>
-            <View style={styles.budgetContainer}>
+            <View style={styles.costContainer}>
               <SubscriptionGuard
                 isPremium={isPremium}
-                lockedText="Budget: "
+                lockedText="Cost: "
                 textStyle={{ fontSize: fontSize.xs }}
                 iconSize={14}
                 lockedTextMarginRight={0}
               >
-                <Text style={styles.budgetText}>Budget: $50</Text>
+                {/* hardcoded value for now, replace with DB interaction later */}
+                <Text style={styles.costText}>Cost: $50</Text>
               </SubscriptionGuard>
             </View>
             <Text style={styles.dateText}>{history.date}</Text>
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: 20,
     padding: 15,
+    paddingHorizontal: 18,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
@@ -111,12 +113,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  budgetContainer: {
+  costContainer: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  budgetText: {
+  costText: {
     fontSize: fontSize.xs,
     marginRight: 5,
     fontFamily: "Nunito-Regular",

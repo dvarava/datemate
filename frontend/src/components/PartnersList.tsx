@@ -1,17 +1,12 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-} from "react-native";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/constants/tokens";
 import { useRouter } from "expo-router";
 import { Profile } from "@/types/profile";
 import Avatar from "./Avatar";
 
+// Props for PartnersList
 interface PartnersListProps {
   profiles: Profile[];
   showActions?: boolean;
@@ -20,58 +15,55 @@ interface PartnersListProps {
   onSelect?: (partner: Profile) => void;
 }
 
-const ProfileCard: React.FC<{
+// Props for ProfileCard
+interface ProfileCardProps {
   profile: Profile;
   showActions?: boolean;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onSelect?: (partner: Profile) => void;
-}> = ({ profile, showActions = true, onEdit, onDelete, onSelect }) => {
+}
+
+// ProfileCard Component
+const ProfileCard: React.FC<ProfileCardProps> = ({ profile, showActions = true, onEdit, onDelete, onSelect }) => {
   const router = useRouter();
 
-  const handleNavigate = () => {
-    router.push({
-      pathname: `/navigation/partner-details`,
-      params: { id: profile.id, name: profile.name },//???
-    });
+  // Handle profile selection and navigation based on available handlers
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect(profile);  // Trigger onSelect if provided
+    } else {
+      // Navigate to partner-details page if no onSelect handler
+      router.push({
+        pathname: `/navigation/partner-details`,
+        params: { id: profile.id, name: profile.name },
+      });
+    }
   };
 
-  // Placeholder gradient for now (replace with DB value when connected)
   const gradient = profile.avatarGradient || ["#ff0262", "#ffffff"];
 
   return (
-    <TouchableOpacity
-      onPress={() => onSelect?.(profile)}
-      style={styles.profileCard}
-    >
+    <TouchableOpacity onPress={handleSelect} style={styles.profileCard}>
       <Avatar gradient={gradient} style={styles.avatar} />
-      <Text
-        style={styles.profileText}
-      >{`${profile.name}, ${profile.age}`}</Text>
+      <Text style={styles.profileText}>{`${profile.name}, ${profile.age}`}</Text>
+
       {showActions && (
-        <>
-          <TouchableOpacity onPress={handleNavigate} style={styles.iconButton}>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity onPress={handleSelect} style={styles.iconButton}>
             <Ionicons name="information-circle" size={20} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => onDelete?.(profile.id)}
-            style={styles.iconButton}
-          >
+          <TouchableOpacity onPress={() => onDelete?.(profile.id)} style={styles.iconButton}>
             <Ionicons name="trash" size={20} color="#fff" />
           </TouchableOpacity>
-        </>
+        </View>
       )}
     </TouchableOpacity>
   );
 };
 
-const PartnersList: React.FC<PartnersListProps> = ({
-  profiles,
-  showActions = true,
-  onEdit,
-  onDelete,
-  onSelect,
-}) => {
+// PartnersList Component
+const PartnersList: React.FC<PartnersListProps> = ({ profiles, showActions = true, onEdit, onDelete, onSelect }) => {
   return (
     <FlatList
       data={profiles}
@@ -82,7 +74,7 @@ const PartnersList: React.FC<PartnersListProps> = ({
           showActions={showActions}
           onEdit={onEdit}
           onDelete={onDelete}
-          onSelect={onSelect}
+          onSelect={onSelect}  // Pass onSelect for selecting a partner
         />
       )}
       contentContainerStyle={styles.profileList}
@@ -90,6 +82,7 @@ const PartnersList: React.FC<PartnersListProps> = ({
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: colors.primary,
@@ -111,6 +104,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.background,
     fontFamily: "Nunito-Black",
+  },
+  actionsContainer: {
+    flexDirection: "row",
   },
   iconButton: {
     padding: 10,
