@@ -137,7 +137,7 @@ const AddPartnerScreen = () => {
       return;
     }
 
-    if (nameLength < 2 || nameLength > 18) {
+    if (nameLength < 2 || nameLength > 10) {
       setIsNameValid(false);
       setNameError("Name must be between 2 and 18 letters.");
       return;

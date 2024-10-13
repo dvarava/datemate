@@ -72,6 +72,10 @@ const PartnerDetailsScreen: React.FC = () => {
 
   const [isLovesValid, setIsLovesValid] = useState(true);
   const [lovesError, setLovesError] = useState("");
+  const [isNameValid, setIsNameValid] = useState(true);
+  const [nameError, setNameError] = useState("");
+  const [isAgeValid, setIsAgeValid] = useState(true);
+  const [ageError, setAgeError] = useState("");
 
   const router = useRouter();
 
@@ -133,19 +137,26 @@ const PartnerDetailsScreen: React.FC = () => {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = () => {  
+    handleNameSubmit();
+    handleAgeSubmit();
+  
     if (partnerLoves.length < 3) {
       setIsLovesValid(false);
       setLovesError("Please enter at least 3 interests.");
+    } else {
+      setIsLovesValid(true);
+      setLovesError("");
+    }
+  
+    if (!isNameValid || !isAgeValid || !isLovesValid) {
       return;
     }
-    setIsLovesValid(true);
-    setLovesError("");
-
+  
     setIsEditing(false);
     console.log("Saving updated partner details...");
     // Add PUT request to update partner details in the database here
-  };
+  };  
 
   const handleDietSelect = (diet: string) => {
     setSelectedDiet((prev) =>
@@ -203,6 +214,46 @@ const PartnerDetailsScreen: React.FC = () => {
     Keyboard.dismiss();
   };
 
+  const handleNameSubmit = () => {
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const nameLength = partnerName.trim().length;
+
+    if (!nameRegex.test(partnerName)) {
+      setIsNameValid(false);
+      setNameError("Only English letters.");
+      return;
+    }
+
+    if (nameLength < 2 || nameLength > 10) {
+      setIsNameValid(false);
+      setNameError("Must be 2-18 letters.");
+      return;
+    }
+
+    setIsNameValid(true);
+    setNameError("");
+  };
+
+  const handleAgeSubmit = () => {
+    const numberRegex = /^[0-9]+$/;
+    const ageRangeRegex = /^(1[0-9]|[2-9][0-9]|100)$/;
+
+    if (!numberRegex.test(partnerAge)) {
+      setIsAgeValid(false);
+      setAgeError("Only numbers are allowed.");
+      return;
+    }
+
+    if (!ageRangeRegex.test(partnerAge)) {
+      setIsAgeValid(false);
+      setAgeError("Must be 10-100.");
+      return;
+    }
+
+    setIsAgeValid(true);
+    setAgeError("");
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -213,24 +264,44 @@ const PartnerDetailsScreen: React.FC = () => {
               <Avatar gradient={["#ff0262", "#ffffff"]} style={styles.avatar} />
               <View style={styles.nameAgeContainer}>
                 {isEditing ? (
-                  <TextInput
-                    style={styles.nameInput}
-                    value={partnerName}
-                    onChangeText={setPartnerName}
-                    placeholder="Name"
-                  />
+                  <View>
+                    <TextInput
+                      style={[
+                        styles.nameInput,
+                        !isNameValid && { borderColor: colors.secondary },
+                      ]}
+                      value={partnerName}
+                      onChangeText={setPartnerName}
+                      placeholder="Name"
+                      placeholderTextColor={"#D4D4D4"}
+                      onEndEditing={handleNameSubmit}
+                    />
+                    {!isNameValid && (
+                      <Text style={styles.nameErrorText}>{nameError}</Text>
+                    )}
+                  </View>
                 ) : (
                   <Text style={styles.profileName}>{partnerName}</Text>
                 )}
 
                 {isEditing ? (
-                  <TextInput
-                    style={styles.ageInput}
-                    value={partnerAge}
-                    onChangeText={setPartnerAge}
-                    placeholder="Age"
-                    keyboardType="numeric"
-                  />
+                  <View>
+                    <TextInput
+                      style={[
+                        styles.ageInput,
+                        !isAgeValid && { borderColor: colors.secondary },
+                      ]}
+                      value={partnerAge}
+                      onChangeText={setPartnerAge}
+                      placeholder="Age"
+                      placeholderTextColor={"#D4D4D4"}
+                      keyboardType="numeric"
+                      onEndEditing={handleAgeSubmit}
+                    />
+                    {!isAgeValid && (
+                      <Text style={styles.errorText}>{ageError}</Text>
+                    )}
+                  </View>
                 ) : (
                   <Text style={styles.profileAge}>{partnerAge} years old</Text>
                 )}
@@ -498,9 +569,9 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: fontSize.xs,
-    color: "#666",
+    color: colors.secondaryBackground,
     marginBottom: 5,
-    fontFamily: "Nunito-Regular",
+    fontFamily: "Nunito-Bold",
   },
   personalityText: {
     fontSize: fontSize.sm,
@@ -554,6 +625,12 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontSize: fontSize.xs,
     marginTop: 5,
+    fontFamily: "Nunito-Regular",
+  },
+  nameErrorText: {
+    color: colors.secondary,
+    fontSize: fontSize.xs,
+    marginBottom: 5,
     fontFamily: "Nunito-Regular",
   },
   input: {
