@@ -210,8 +210,13 @@ const DatePlanScreen: React.FC = () => {
             ))}
           </View>
 
-          <View style={styles.buttonContainer}>
-          <TouchableOpacity
+          <View
+            style={[
+              styles.buttonContainer,
+              showRegenerateButton === "false" && { justifyContent: 'center', gap: 20 },
+            ]}
+          >
+            <TouchableOpacity
               onPress={handleAddToFavourites}
               style={styles.bottomButton}
             >
