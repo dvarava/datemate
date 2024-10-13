@@ -16,6 +16,7 @@ import { useRouter } from "expo-router";
 import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import HomeCalendar from "@/components/HomeCalendar";
 import * as Notifications from "expo-notifications";
+import RobotSvg from "@/svg/robot";
 
 interface HolidayInfo {
   name: string;
@@ -196,11 +197,12 @@ const HomeScreen = () => {
           <Text style={styles.cardText}>Partners: 2</Text>
         </View>
         <View style={styles.robotIcon}>
-          <Image
-            source={require("@/assets/robot.png")}
+          <RobotSvg
             style={{
               flex: 1,
-              resizeMode: "contain",
+              width: "100%",
+              height: undefined,
+              aspectRatio: 2,
             }}
           />
         </View>
