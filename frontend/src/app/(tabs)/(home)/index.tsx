@@ -47,25 +47,70 @@ const getNthDayInMonth = (
 
 const holidays = [
   { name: "Commitment Day", date: new Date(new Date().getFullYear(), 0, 1) },
-  { name: "National Cuddling Day", date: new Date(new Date().getFullYear(), 0, 6) },
-  { name: "National Hugging Day", date: new Date(new Date().getFullYear(), 0, 21) },
+  {
+    name: "National Cuddling Day",
+    date: new Date(new Date().getFullYear(), 0, 6),
+  },
+  {
+    name: "National Hugging Day",
+    date: new Date(new Date().getFullYear(), 0, 21),
+  },
   { name: "Hug Day", date: new Date(new Date().getFullYear(), 1, 12) },
   { name: "Kiss Day", date: new Date(new Date().getFullYear(), 1, 13) },
   { name: "Valentine’s Day", date: new Date(new Date().getFullYear(), 1, 14) },
-  { name: "World Compliment Day", date: new Date(new Date().getFullYear(), 2, 1) },
-  { name: "National Lover’s Day", date: new Date(new Date().getFullYear(), 3, 23) },
-  { name: "Couple Appreciation Day", date: new Date(new Date().getFullYear(), 4, 1) },
-  { name: "National Loving Day", date: new Date(new Date().getFullYear(), 5, 12) },
-  { name: "National Kissing Day", date: new Date(new Date().getFullYear(), 5, 22) },
+  {
+    name: "World Compliment Day",
+    date: new Date(new Date().getFullYear(), 2, 1),
+  },
+  {
+    name: "National Lover’s Day",
+    date: new Date(new Date().getFullYear(), 3, 23),
+  },
+  {
+    name: "Couple Appreciation Day",
+    date: new Date(new Date().getFullYear(), 4, 1),
+  },
+  {
+    name: "National Loving Day",
+    date: new Date(new Date().getFullYear(), 5, 12),
+  },
+  {
+    name: "National Kissing Day",
+    date: new Date(new Date().getFullYear(), 5, 22),
+  },
   { name: "Hug Holiday", date: new Date(new Date().getFullYear(), 5, 29) },
-  { name: "International Kissing Day", date: new Date(new Date().getFullYear(), 6, 6) },
-  { name: "National Girlfriend Day", date: new Date(new Date().getFullYear(), 7, 1) },
-  { name: "National Hand Holding Day", date: new Date(new Date().getFullYear(), 7, 9) },
-  { name: "Kiss and Make Up Day", date: new Date(new Date().getFullYear(), 7, 25) },
-  { name: "National Feel The Love Day", date: new Date(new Date().getFullYear(), 8, 7) },
-  { name: "National Boyfriend Day", date: new Date(new Date().getFullYear(), 9, 3) },
-  { name: "National I Love You Day", date: new Date(new Date().getFullYear(), 9, 14) },
-  { name: "National Make a Gift Day", date: new Date(new Date().getFullYear(), 11, 3) },
+  {
+    name: "International Kissing Day",
+    date: new Date(new Date().getFullYear(), 6, 6),
+  },
+  {
+    name: "National Girlfriend Day",
+    date: new Date(new Date().getFullYear(), 7, 1),
+  },
+  {
+    name: "National Hand Holding Day",
+    date: new Date(new Date().getFullYear(), 7, 9),
+  },
+  {
+    name: "Kiss and Make Up Day",
+    date: new Date(new Date().getFullYear(), 7, 25),
+  },
+  {
+    name: "National Feel The Love Day",
+    date: new Date(new Date().getFullYear(), 8, 7),
+  },
+  {
+    name: "National Boyfriend Day",
+    date: new Date(new Date().getFullYear(), 9, 3),
+  },
+  {
+    name: "National I Love You Day",
+    date: new Date(new Date().getFullYear(), 9, 14),
+  },
+  {
+    name: "National Make a Gift Day",
+    date: new Date(new Date().getFullYear(), 11, 3),
+  },
 ];
 
 const specialDates = holidays
@@ -176,11 +221,10 @@ const HomeScreen = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Calendar Component */}
-      <HomeCalendar
-        style={styles.calendar}
-        specialDates={specialDates}
-        // TODO: Add logic to parse user's scheduled dates from the database and include them here along with holidays.
-      />
+      <View style={styles.calendarWrapper}>
+        <HomeCalendar specialDates={specialDates} />
+        {/* // TODO: Add logic to parse user's scheduled dates from the database and include them here along with holidays. */}
+      </View>
 
       {/* Overview Section */}
       <RegularCard style={styles.overviewCard}>
@@ -294,6 +338,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     padding: 25,
+    paddingTop: 20,
+  },
+  calendarWrapper: {
+    marginHorizontal: -28,
+    marginBottom: 15,
   },
   calendar: {
     marginBottom: 15,

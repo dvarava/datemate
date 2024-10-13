@@ -13,7 +13,13 @@ const DateHistoryCard: React.FC<{
   isPremium: boolean;
   showAvatar?: boolean;
   showFavorite?: boolean;
-}> = ({ history, onActionPress, isPremium, showAvatar = true, showFavorite = true }) => {
+}> = ({
+  history,
+  onActionPress,
+  isPremium,
+  showAvatar = true,
+  showFavorite = true,
+}) => {
   const router = useRouter();
 
   const handlePress = () => {
@@ -32,14 +38,18 @@ const DateHistoryCard: React.FC<{
   return (
     <TouchableOpacity onPress={handlePress}>
       <View style={styles.historyCard}>
-        {showAvatar && <Avatar gradient={history.avatarGradient} style={styles.avatar} />}
+        {showAvatar && (
+          <Avatar gradient={history.avatarGradient} style={styles.avatar} />
+        )}
         <View style={styles.historyDetailsContainer}>
           <View style={styles.nameDescriptionRow}>
             <View style={styles.nameDescriptionContainer}>
               <Text style={styles.historyName}>
                 {`${history.name}, ${history.age}`}
               </Text>
-              <Text style={styles.historyDescription}>{history.dateDescription}</Text>
+              <Text style={styles.historyDescription}>
+                {history.dateDescription}
+              </Text>
             </View>
 
             <TouchableOpacity
@@ -47,9 +57,21 @@ const DateHistoryCard: React.FC<{
               style={!showFavorite ? styles.iconButton : undefined}
             >
               <Ionicons
-                name={showFavorite ? (history.isFavorite ? "heart" : "heart-outline") : "trash"}
+                name={
+                  showFavorite
+                    ? history.isFavorite
+                      ? "heart"
+                      : "heart-outline"
+                    : "trash"
+                }
                 size={showFavorite ? 28 : 20}
-                color={showFavorite ? (history.isFavorite ? colors.secondary : "#666") : colors.primary}
+                color={
+                  showFavorite
+                    ? history.isFavorite
+                      ? colors.secondary
+                      : "#666"
+                    : colors.primary
+                }
               />
             </TouchableOpacity>
           </View>
@@ -138,7 +160,6 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#333",
     borderRadius: 20,
-    marginLeft: 10,
   },
 });
 

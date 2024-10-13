@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
@@ -19,17 +19,24 @@ interface HomeCalendarProps {
   specialDates?: Date[];
 }
 
-const HomeCalendar: React.FC<HomeCalendarProps> = ({ style, specialDates = [] }) => {
-  const [currentWeekIndex, setCurrentWeekIndex] = useState<number>(
-    52
-  );
+const HomeCalendar: React.FC<HomeCalendarProps> = ({
+  style,
+  specialDates = [],
+}) => {
+  const numWeeksBefore = 5;
+  const numWeeksAfter = 5;
+  const totalWeeks = numWeeksBefore + numWeeksAfter + 1;
+  const currentWeekIndex = numWeeksBefore;
 
   const flatListRef = useRef<FlatList<any>>(null);
 
   const getWeekDates = (startDate: Date) => {
     const weekDates = [];
+    const dayOfWeek = (startDate.getDay() + 6) % 7;
     const firstDayOfWeek = new Date(
-      startDate.setDate(startDate.getDate() - startDate.getDay() + 1)
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate() - dayOfWeek
     );
 
     for (let i = 0; i < 7; i++) {
@@ -40,18 +47,24 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ style, specialDates = [] })
     return weekDates;
   };
 
-  const generateWeeks = (numWeeks: number) => {
+  const generateWeeks = (numWeeksBefore: number, numWeeksAfter: number) => {
     const weeks = [];
     const today = new Date();
+    const dayOfWeek = (today.getDay() + 6) % 7;
     const startDate = new Date(
-      today.setDate(today.getDate() - today.getDay() + 1 - numWeeks * 7)
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - dayOfWeek - numWeeksBefore * 7
     );
 
-    for (let i = 0; i < numWeeks * 2 + 1; i++) {
+    const totalWeeks = numWeeksBefore + numWeeksAfter + 1;
+    for (let i = 0; i < totalWeeks; i++) {
       const weekStart = new Date(
-        startDate.setDate(startDate.getDate() + (i === 0 ? 0 : 7))
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate() + i * 7
       );
-      weeks.push(getWeekDates(new Date(weekStart)));
+      weeks.push(getWeekDates(weekStart));
     }
     return weeks;
   };
@@ -65,49 +78,47 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ style, specialDates = [] })
     );
   };
 
-  const weeks = generateWeeks(52);
+  const weeks = generateWeeks(numWeeksBefore, numWeeksAfter);
 
-  const renderWeek = ({ item }: { item: Date[] }) => {
-    return (
-      <View style={styles.weekContainer}>
-        <View style={styles.rowContainer}>
-          {item.map((date, index) => {
-            const isSpecial = specialDates.some(
-              (specialDate) =>
-                specialDate.getDate() === date.getDate() &&
-                specialDate.getMonth() === date.getMonth() &&
-                specialDate.getFullYear() === date.getFullYear()
-            );
-            return (
-              <View key={index} style={styles.columnContainer}>
-                <Text style={styles.dayText}>{daysOfWeek[index]}</Text>
-                <TouchableOpacity
+  const renderWeek = ({ item }: { item: Date[] }) => (
+    <View style={styles.weekContainer}>
+      <View style={styles.rowContainer}>
+        {item.map((date, index) => {
+          const isSpecial = specialDates.some(
+            (specialDate) =>
+              specialDate.getDate() === date.getDate() &&
+              specialDate.getMonth() === date.getMonth() &&
+              specialDate.getFullYear() === date.getFullYear()
+          );
+          return (
+            <View key={index} style={styles.columnContainer}>
+              <Text style={styles.dayText}>{daysOfWeek[index]}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.dateContainer,
+                  isSpecial && styles.specialDateContainer,
+                  isToday(date) && styles.todayDateContainer,
+                ]}
+                activeOpacity={0.7}
+              >
+                <Text
                   style={[
-                    styles.dateContainer,
-                    isSpecial && styles.specialDateContainer,
-                    isToday(date) && styles.todayDateContainer,
+                    styles.dateText,
+                    isSpecial && styles.specialDateText,
                   ]}
-                  activeOpacity={0.7}
                 >
-                  <Text
-                    style={[
-                      styles.dateText,
-                      isSpecial && styles.specialDateText,
-                    ]}
-                  >
-                    {date.getDate()}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </View>
+                  {date.getDate()}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
       </View>
-    );
-  };
+    </View>
+  );
 
   return (
-    <View style={StyleSheet.flatten([styles.calendarContainer, style])}>
+    <View style={[styles.calendarContainer, style]}>
       <FlatList
         ref={flatListRef}
         data={weeks}
@@ -116,13 +127,16 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ style, specialDates = [] })
         showsHorizontalScrollIndicator={false}
         renderItem={renderWeek}
         keyExtractor={(_, index) => index.toString()}
-        initialScrollIndex={currentWeekIndex}
         getItemLayout={(_, index) => ({
           length: width,
           offset: width * index,
           index,
         })}
-        onScrollToIndexFailed={() => {}}
+        initialScrollIndex={currentWeekIndex}
+        initialNumToRender={totalWeeks}
+        maxToRenderPerBatch={totalWeeks}
+        windowSize={totalWeeks}
+        removeClippedSubviews={false}
       />
     </View>
   );
@@ -135,7 +149,7 @@ const styles = StyleSheet.create({
     width: width,
   },
   weekContainer: {
-    width: width - 2.5,
+    width: width,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -143,11 +157,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: width - 40,
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
   },
   columnContainer: {
     alignItems: "center",
-    flexDirection: "column",
   },
   dateContainer: {
     width: 30,
@@ -155,13 +168,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
   },
   specialDateContainer: {
     backgroundColor: colors.secondary,
   },
   todayDateContainer: {
-
     backgroundColor: colors.selected,
   },
   dateText: {
@@ -172,6 +183,7 @@ const styles = StyleSheet.create({
   },
   specialDateText: {
     color: colors.primary,
+    fontFamily: "Nunito-Bold",
   },
   dayText: {
     fontSize: fontSize.sm,

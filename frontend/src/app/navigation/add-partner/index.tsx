@@ -437,7 +437,6 @@ const AddPartnerScreen = () => {
               Example: Sunsets, concerts, Thai food, art, John Wick, horses.
             </Text>
 
-            {/* Suggested Interests */}
             <View style={styles.suggestedContainer}>
               {suggestedInterests.map((interest, index) => (
                 <TouchableOpacity
