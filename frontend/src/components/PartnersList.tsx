@@ -50,9 +50,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, showActions = true, 
 
       {showActions && (
         <View style={styles.actionsContainer}>
-          <TouchableOpacity onPress={handleSelect} style={styles.iconButton}>
-            <Ionicons name="information-circle" size={20} color="#fff" />
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => onDelete?.(profile.id)} style={styles.iconButton}>
             <Ionicons name="trash" size={20} color="#fff" />
           </TouchableOpacity>
