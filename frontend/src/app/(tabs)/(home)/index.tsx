@@ -46,51 +46,45 @@ const getNthDayInMonth = (
 };
 
 const holidays = [
+  { name: "Commitment Day", date: new Date(new Date().getFullYear(), 0, 1) },
+  { name: "National Cuddling Day", date: new Date(new Date().getFullYear(), 0, 6) },
+  { name: "National Hugging Day", date: new Date(new Date().getFullYear(), 0, 21) },
+  { name: "Hug Day", date: new Date(new Date().getFullYear(), 1, 12) },
+  { name: "Kiss Day", date: new Date(new Date().getFullYear(), 1, 13) },
   { name: "Valentine’s Day", date: new Date(new Date().getFullYear(), 1, 14) },
-  {
-    name: "Marriage Day",
-    getDate: (year: number) => getNthDayInMonth(year, 1, 0, 2),
-  },
-  { name: "Day of Happiness", date: new Date(new Date().getFullYear(), 2, 20) },
-  {
-    name: "Kiss & Make Up Day",
-    date: new Date(new Date().getFullYear(), 7, 25),
-  },
-  {
-    name: "Sweetest Day",
-    getDate: (year: number) => getNthDayInMonth(year, 9, 6, 3),
-  },
-  { name: "Love Day", date: new Date(new Date().getFullYear(), 4, 1) },
-  { name: "Hug Day", date: new Date(new Date().getFullYear(), 0, 21) },
-  { name: "Proposal Day", date: new Date(new Date().getFullYear(), 2, 20) },
-  { name: "Girlfriend Day", date: new Date(new Date().getFullYear(), 7, 1) },
-  { name: "Boyfriend Day", date: new Date(new Date().getFullYear(), 9, 3) },
+  { name: "World Compliment Day", date: new Date(new Date().getFullYear(), 2, 1) },
+  { name: "National Lover’s Day", date: new Date(new Date().getFullYear(), 3, 23) },
+  { name: "Couple Appreciation Day", date: new Date(new Date().getFullYear(), 4, 1) },
+  { name: "National Loving Day", date: new Date(new Date().getFullYear(), 5, 12) },
+  { name: "National Kissing Day", date: new Date(new Date().getFullYear(), 5, 22) },
+  { name: "Hug Holiday", date: new Date(new Date().getFullYear(), 5, 29) },
+  { name: "International Kissing Day", date: new Date(new Date().getFullYear(), 6, 6) },
+  { name: "National Girlfriend Day", date: new Date(new Date().getFullYear(), 7, 1) },
+  { name: "National Hand Holding Day", date: new Date(new Date().getFullYear(), 7, 9) },
+  { name: "Kiss and Make Up Day", date: new Date(new Date().getFullYear(), 7, 25) },
+  { name: "National Feel The Love Day", date: new Date(new Date().getFullYear(), 8, 7) },
+  { name: "National Boyfriend Day", date: new Date(new Date().getFullYear(), 9, 3) },
+  { name: "National I Love You Day", date: new Date(new Date().getFullYear(), 9, 14) },
+  { name: "National Make a Gift Day", date: new Date(new Date().getFullYear(), 11, 3) },
 ];
 
 const specialDates = holidays
-  .map((holiday) => {
-    if (holiday.date) {
-      return holiday.date;
-    } else if (holiday.getDate) {
-      return holiday.getDate(new Date().getFullYear());
-    }
-    return null;
-  })
+  .map((holiday) => holiday.date)
   .filter((date) => date !== null) as Date[];
 
 const getNearestHoliday = (): HolidayInfo => {
   const today = new Date();
   let nearestHoliday: HolidayInfo = { name: "", daysLeft: Infinity };
   holidays.forEach((holiday) => {
-    const targetDate = holiday.date || holiday.getDate(today.getFullYear());
+    const targetDate = holiday.date;
     const daysLeft = calculateDaysUntilDate(targetDate);
 
     // check days to date
-    // console.log(
-    //   `${holiday.name}:`,
-    //   targetDate.toDateString(),
-    //   `- Days left: ${daysLeft}`
-    // );
+    console.log(
+      `${holiday.name}:`,
+      targetDate.toDateString(),
+      `- Days left: ${daysLeft}`
+    );
 
     if (daysLeft < nearestHoliday.daysLeft) {
       nearestHoliday = { name: holiday.name, daysLeft };

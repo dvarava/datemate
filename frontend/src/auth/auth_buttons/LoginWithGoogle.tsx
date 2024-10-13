@@ -1,16 +1,22 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
-import * as SecureStore from 'expo-secure-store';
-import { useAuthStore } from '@/store/authStore';
-import { colors } from '@/constants/tokens';
+import React, { useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity, Image } from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { useAuthStore } from "@/store/authStore";
+import { colors } from "@/constants/tokens";
 
-const webClientId = '488836930557-abivotpv3q8t8iqkm07ai976jm5ahaph.apps.googleusercontent.com';
-const iosClientId = '488836930557-d61hts76ruifk9722k8updijfkam2l7f.apps.googleusercontent.com';
-const androidClientId = '488836930557-plah1vg3k9a525b8hs97tjlii783m2t0.apps.googleusercontent.com';
+const webClientId =
+  "488836930557-abivotpv3q8t8iqkm07ai976jm5ahaph.apps.googleusercontent.com";
+const iosClientId =
+  "488836930557-d61hts76ruifk9722k8updijfkam2l7f.apps.googleusercontent.com";
+const androidClientId =
+  "488836930557-plah1vg3k9a525b8hs97tjlii783m2t0.apps.googleusercontent.com";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginWithGoogle = () => {
   const { setAuth } = useAuthStore();
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId,
     iosClientId,
@@ -19,40 +25,25 @@ const LoginWithGoogle = () => {
 
   const getUserProfile = async (token: string) => {
     try {
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+      const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const user = await res.json();
-      setAuth(user);
-      await SecureStore.setItemAsync('authToken', token);
+      setAuth(user); // Set user data in the store
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
+      console.error("Failed to fetch user data:", error);
     }
   };
 
   useEffect(() => {
-    if (response?.type === 'success' && response.authentication?.idToken) {
-      fetch('http://localhost:3000/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: response.authentication.idToken }),
-      })
-      .then(res => res.json())
-      .then(async data => {
-        if (data && data.user && response.authentication?.idToken) {
-          setAuth(data.user);
-          await SecureStore.setItemAsync('authToken', response.authentication.idToken);
-        }
-      })
-      .catch(error => {
-        console.error('Error during Google login:', error);
-      });
+    if (response?.type === "success" && response.authentication?.accessToken) {
+      getUserProfile(response.authentication.accessToken);
     }
   }, [response]);
 
   return (
     <TouchableOpacity style={styles.wrapper} onPress={() => promptAsync()}>
-      <Image source={require('assets/google-logo.png')} style={styles.brand} />
+      <Image source={require("assets/google-logo.png")} style={styles.brand} />
       <Text style={styles.txt}>Sign in with Google</Text>
     </TouchableOpacity>
   );
@@ -60,13 +51,19 @@ const LoginWithGoogle = () => {
 
 const styles = StyleSheet.create({
   wrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    justifyContent: 'center',
+    width: 250,
+    justifyContent: "center",
     marginVertical: 10,
   },
   brand: {
@@ -75,8 +72,10 @@ const styles = StyleSheet.create({
   },
   txt: {
     fontSize: 16,
-    color: '#000',
-    fontWeight: '500',
+    color: "#000",
+    fontWeight: "500",
+    padding: 5,
+    fontFamily: "Nunito-Bold",
   },
 });
 
