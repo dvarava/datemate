@@ -174,7 +174,7 @@ const HomeScreen = () => {
   const router = useRouter();
   const navigateBlocked = useRef(false);
   const [isNotified, setIsNotified] = useState(false);
-  const isPremium = false;
+  const isPremium = true;
 
   const handleBuyNow = () => {
     if (!navigateBlocked.current) {
@@ -205,7 +205,7 @@ const HomeScreen = () => {
         sound: true,
       },
       trigger: {
-        seconds: nearestHoliday.daysLeft * 24 * 60 * 60, // Convert days to seconds
+        seconds: nearestHoliday.daysLeft * 24 * 60 * 60,
       },
     });
 

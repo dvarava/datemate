@@ -1,53 +1,17 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  Platform,
-} from "react-native";
-import * as AppleAuthentication from "expo-apple-authentication";
+import { StyleSheet, Text, TouchableOpacity, Image, Platform } from "react-native";
 import { useAuthStore } from "@/store/authStore";
 import { colors } from "@/constants/tokens";
 
 const LoginWithApple = () => {
-  const setAuth = useAuthStore((state) => state.setAuth);
-
-  const signIn = async () => {
-    try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-      console.log({
-        id: credential.identityToken,
-        authorization_code: credential.authorizationCode,
-      });
-
-      setAuth({
-        id: credential.identityToken,
-        authorization_code: credential.authorizationCode,
-        name: credential.fullName,
-        email: credential.email,
-      });
-    } catch (e: any) {
-      if (e.code === "ERR_REQUEST_CANCELED") {
-        console.log("User canceled the sign-in request");
-      } else {
-        console.log("An error occurred: ", e);
-      }
-    }
-  };
+  const loginWithApple = useAuthStore((state) => state.loginWithApple);
 
   if (Platform.OS !== "ios") {
     return null;
   }
 
   return (
-    <TouchableOpacity style={styles.customButton} onPress={signIn}>
+    <TouchableOpacity style={styles.customButton} onPress={loginWithApple}>
       <Image
         source={require("assets/apple-logo.png")}
         style={styles.appleLogo}
@@ -56,7 +20,6 @@ const LoginWithApple = () => {
     </TouchableOpacity>
   );
 };
-
 const styles = StyleSheet.create({
   customButton: {
     flexDirection: "row",

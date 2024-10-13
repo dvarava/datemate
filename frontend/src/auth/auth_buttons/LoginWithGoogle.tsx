@@ -29,7 +29,7 @@ const LoginWithGoogle = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const user = await res.json();
-      setAuth(user); // Set user data in the store
+      setAuth(user);
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
