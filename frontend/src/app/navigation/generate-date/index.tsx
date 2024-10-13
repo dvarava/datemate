@@ -138,7 +138,12 @@ const GenerateDateScreen = () => {
       partners: selectedPartner,
     });
 
-    router.push("/navigation/date-plan");
+    router.push({
+      pathname: "/navigation/date-plan",
+      params: {
+        showRegenerateButton: "true",
+      },
+    });
   };
 
   const handleMoodSelection = (mood: string) => {

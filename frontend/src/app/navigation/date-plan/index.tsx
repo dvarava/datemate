@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useLocalSearchParams } from "expo-router";
 
 const heartsBranchFirst = require("@/assets/branches/hearts_branch_1.png");
 const heartsBranchSecond = require("@/assets/branches/hearts_branch_2.png");
@@ -31,6 +32,8 @@ type Activity = {
 
 const DatePlanScreen: React.FC = () => {
   const router = useRouter();
+  const { showRegenerateButton } = useLocalSearchParams();
+
   const [isFavourite, setIsFavourite] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
@@ -208,20 +211,7 @@ const DatePlanScreen: React.FC = () => {
           </View>
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={handleAddToCalendar}
-              style={styles.bottomButton}
-            >
-              <View style={styles.basicBottomButton}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={28}
-                  color={colors.background}
-                />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+          <TouchableOpacity
               onPress={handleAddToFavourites}
               style={styles.bottomButton}
             >
@@ -235,22 +225,37 @@ const DatePlanScreen: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={handleRegenerate}
+              onPress={handleAddToCalendar}
               style={styles.bottomButton}
             >
-              <LinearGradient
-                colors={[colors.secondary, colors.primary]}
-                start={{ x: 0.1, y: 0 }}
-                end={{ x: 1, y: 1.5 }}
-                style={styles.regenerateButton}
-              >
+              <View style={styles.basicBottomButton}>
                 <Ionicons
-                  name="refresh-outline"
+                  name="calendar-outline"
                   size={28}
-                  color={colors.primary}
+                  color={colors.background}
                 />
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
+
+            {showRegenerateButton === "true" && (
+              <TouchableOpacity
+                onPress={handleRegenerate}
+                style={styles.bottomButton}
+              >
+                <LinearGradient
+                  colors={[colors.secondary, colors.primary]}
+                  start={{ x: 0.1, y: 0 }}
+                  end={{ x: 1, y: 1.5 }}
+                  style={styles.regenerateButton}
+                >
+                  <Ionicons
+                    name="refresh-outline"
+                    size={28}
+                    color={colors.primary}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -509,17 +514,19 @@ const styles = StyleSheet.create({
   bottomButton: {
     borderRadius: 25,
     elevation: 5,
+    width: "28%",
+    textAlign: "center",
   },
   basicBottomButton: {
     backgroundColor: colors.primary,
     paddingVertical: 15,
-    paddingHorizontal: 35,
     borderRadius: 25,
+    alignItems: "center",
   },
   regenerateButton: {
     paddingVertical: 15,
-    paddingHorizontal: 35,
     borderRadius: 25,
+    alignItems: "center",
   },
   modalContainer: {
     flex: 1,

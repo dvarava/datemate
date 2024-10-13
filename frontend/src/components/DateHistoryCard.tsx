@@ -24,6 +24,7 @@ const DateHistoryCard: React.FC<{
         age: history.age,
         description: history.dateDescription,
         date: history.date,
+        showRegenerateButton: "false",
       },
     });
   };
