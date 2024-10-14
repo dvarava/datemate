@@ -1,5 +1,6 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { create } from 'zustand';
+import * as SecureStore from 'expo-secure-store';
 
 type AuthState = {
   user: {
@@ -10,7 +11,8 @@ type AuthState = {
   setAuth: (user: { id: string; email: string | null }) => void;
   logout: () => void;
   loginWithApple: () => Promise<void>;
-};
+  setAuthFromGoogle: (token: string) => Promise<void>;}
+  ;
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -51,6 +53,36 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         console.error('Apple login error:', error);
       }
+    }
+  },
+  setAuthFromGoogle: async (token: string) => {
+    try {
+      const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const userProfile = await res.json();
+
+      const backendResponse = await fetch('http://localhost:3000/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userProfile.email,
+        }),
+      });
+
+      const backendData = await backendResponse.json();
+      if (backendData && backendData.user) {
+        set({
+          user: {
+            id: backendData.user._id,
+            email: backendData.user.email,
+          },
+          isAuthenticated: true,
+        });
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
     }
   },
 }));
