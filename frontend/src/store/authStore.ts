@@ -5,29 +5,33 @@ import * as SecureStore from 'expo-secure-store';
 type AuthState = {
   user: {
     id: string | null;
-    email: string | null;
   } | null;
   isAuthenticated: boolean;
-  setAuth: (user: { id: string; email: string | null }) => void;
-  logout: () => void;
+  setAuth: (user: { id: string }) => Promise<void>;
+  logout: () => Promise<void>;
   loginWithApple: () => Promise<void>;
-  setAuthFromGoogle: (token: string) => Promise<void>;}
-  ;
+  setAuthFromGoogle: (token: string) => Promise<void>;
+  validateSession: () => Promise<void>;
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
 
-  setAuth: (user) => set({ user, isAuthenticated: !!user }),
+  setAuth: async (user) => {
+    set({ user, isAuthenticated: !!user });
+    await SecureStore.setItemAsync('userId', user.id);
+  },
 
-  logout: () => set({ user: null, isAuthenticated: false }),
+  logout: async () => {
+    set({ user: null, isAuthenticated: false });
+    await SecureStore.deleteItemAsync('userId');
+  },
 
   loginWithApple: async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
+        requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
       });
 
       const response = await fetch('http://localhost:3000/auth/apple', {
@@ -41,20 +45,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
 
       const data = await response.json();
-      console.log('Response from backend:', data);
-
       if (data && data.user) {
-        set({ user: { id: data.user._id, email: data.user.email }, isAuthenticated: true });
+        await SecureStore.setItemAsync('userId', data.user._id);
+        set({ user: { id: data.user._id }, isAuthenticated: true });
       }
-
-    } catch (error: any) {
-      if (error.code === 'ERR_REQUEST_CANCELED') {
-        console.log('User canceled the sign-in request');
-      } else {
-        console.error('Apple login error:', error);
-      }
+    } catch (error) {
+      console.error('Apple login error:', error);
     }
   },
+
   setAuthFromGoogle: async (token: string) => {
     try {
       const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
@@ -73,16 +72,26 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       const backendData = await backendResponse.json();
       if (backendData && backendData.user) {
+        await SecureStore.setItemAsync('userId', backendData.user._id);
         set({
-          user: {
-            id: backendData.user._id,
-            email: backendData.user.email,
-          },
+          user: { id: backendData.user._id },
           isAuthenticated: true,
         });
       }
     } catch (error) {
       console.error("Google login error:", error);
+    }
+  },
+
+  validateSession: async () => {
+    const userId = await SecureStore.getItemAsync('userId');
+    if (userId) {
+      set({
+        user: { id: userId },
+        isAuthenticated: true,
+      });
+    } else {
+      set({ user: null, isAuthenticated: false });
     }
   },
 }));
