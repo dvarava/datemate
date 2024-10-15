@@ -16,6 +16,10 @@ export class PartnerService {
     return this.partnerModel.find({ userId }).exec();
   }
 
+  async updatePartner(partnerId: string, updateData: Partial<Partner>): Promise<Partner | null> {
+    return this.partnerModel.findByIdAndUpdate(partnerId, updateData, { new: true }).exec();
+  }
+
   async deletePartner(partnerId: string): Promise<any> {
     return this.partnerModel.findByIdAndDelete(partnerId).exec();
   }

@@ -1,28 +1,28 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import PartnersList from "@/components/PartnersList";
 import { colors } from "@/constants/tokens";
-import { Profile } from "@/types/profile";
+import { usePartnerStore } from "@/store/partner.store";
 
 const PartnersScreen: React.FC = () => {
-  // hardcoded data
-  const [profiles, setProfiles] = useState<Profile[]>([
-    { id: "1", name: "Anna", age: 21, avatarGradient: ["#ff0262", "#fff"] },
-    { id: "2", name: "Diana", age: 23, avatarGradient: ["#4469d2", "#fff"] },
-    {
-      id: "3",
-      name: "Tamara",
-      age: 48,
-      avatarGradient: ["#d244ac", "#fff"],
-    },
-  ]);
+  const { partners, fetchPartners, deletePartner, editPartner } = usePartnerStore();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPartners = async () => {
+      setLoading(true);
+      await fetchPartners();
+      setLoading(false);
+    };
+    loadPartners();
+  }, []);
 
   const handleEditProfile = (id: string) => {
-    console.log(`Edit profile with id: ${id}`);
+    const updatedName = "New Name"; // Example placeholder, you can replace with actual input logic
+    editPartner(id, { name: updatedName });
   };
 
-  // delete from DB here
   const handleDeleteProfile = (id: string) => {
     Alert.alert(
       "Confirm Delete",
@@ -36,7 +36,7 @@ const PartnersScreen: React.FC = () => {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            setProfiles(profiles.filter((profile) => profile.id !== id));
+            deletePartner(id);
           },
         },
       ]
@@ -47,6 +47,14 @@ const PartnersScreen: React.FC = () => {
     router.push("/navigation/add-partner");
   };
 
+  const partnerProfiles = partners.map(partner => ({
+    id: partner.id || String(Math.random()),  // Unique fallback if id is missing (not recommended, but ensures no duplicate keys)
+    name: partner.name,
+    age: partner.age,
+    gender: partner.gender,
+    avatarGradient: partner.avatarGradient || ['#4469d2', '#fff'],  // Fallback for missing gradients
+  }));
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Your partner's profiles</Text>
@@ -55,12 +63,16 @@ const PartnersScreen: React.FC = () => {
         <Text style={styles.addButtonText}>Click to add partner</Text>
       </TouchableOpacity>
 
-      <PartnersList
-        profiles={profiles}
-        showActions={true}
-        onEdit={handleEditProfile}
-        onDelete={handleDeleteProfile}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <PartnersList
+          profiles={partnerProfiles}
+          showActions={true}
+          onEdit={handleEditProfile}
+          onDelete={handleDeleteProfile}
+        />
+      )}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Delete, Patch, Param } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 
 @Controller('partners')
@@ -15,8 +15,16 @@ export class PartnerController {
     return this.partnerService.findPartnersByUser(userId);
   }
 
-  @Delete()
-  async deletePartner(@Query('partnerId') partnerId: string) {
+  @Patch(':partnerId')
+  async editPartner(
+    @Param('partnerId') partnerId: string,
+    @Body() updatePartnerDto: any
+  ) {
+    return this.partnerService.updatePartner(partnerId, updatePartnerDto);
+  }
+
+  @Delete(':partnerId')
+  async deletePartner(@Param('partnerId') partnerId: string) {
     return this.partnerService.deletePartner(partnerId);
   }
 }

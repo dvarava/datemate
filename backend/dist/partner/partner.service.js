@@ -28,6 +28,9 @@ let PartnerService = class PartnerService {
     async findPartnersByUser(userId) {
         return this.partnerModel.find({ userId }).exec();
     }
+    async updatePartner(partnerId, updateData) {
+        return this.partnerModel.findByIdAndUpdate(partnerId, updateData, { new: true }).exec();
+    }
     async deletePartner(partnerId) {
         return this.partnerModel.findByIdAndDelete(partnerId).exec();
     }
