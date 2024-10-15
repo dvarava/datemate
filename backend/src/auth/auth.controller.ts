@@ -10,4 +10,9 @@ export class AuthController {
     const user = await this.authService.handleAppleLogin(token);
     return { user };
   }
+  @Post('google')
+  async loginWithGoogle(@Body() googleData: { email: string }) {
+    const user = await this.authService.handleGoogleLogin(googleData);
+    return { user };
+  }
 }

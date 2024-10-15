@@ -7,15 +7,13 @@ import { User, UserDocument } from './users.schema';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async findById(id: string): Promise<User | null> {
-    return this.userModel.findById(id).exec();
-  }
   async findByEmail(email: string | null): Promise<User | null> {
     return this.userModel.findOne({ email }).exec();
   }
+
   async createUser(userData: { email: string | null }): Promise<User> {
     const newUser = new this.userModel({
-      email: userData.email
+      email: userData.email,  
     });
     return newUser.save();
   }

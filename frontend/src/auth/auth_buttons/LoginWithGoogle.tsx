@@ -15,7 +15,7 @@ const androidClientId =
 WebBrowser.maybeCompleteAuthSession();
 
 const LoginWithGoogle = () => {
-  const { setAuth } = useAuthStore();
+  const { setAuthFromGoogle } = useAuthStore();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId,
@@ -23,21 +23,9 @@ const LoginWithGoogle = () => {
     androidClientId,
   });
 
-  const getUserProfile = async (token: string) => {
-    try {
-      const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const user = await res.json();
-      setAuth(user);
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-    }
-  };
-
   useEffect(() => {
     if (response?.type === "success" && response.authentication?.accessToken) {
-      getUserProfile(response.authentication.accessToken);
+      setAuthFromGoogle(response.authentication.accessToken);
     }
   }, [response]);
 

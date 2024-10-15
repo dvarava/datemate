@@ -3,11 +3,10 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema({ versionKey: false })
+@Schema()
 export class User {
   @Prop({ required: false })
   email: string | null;
-
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
