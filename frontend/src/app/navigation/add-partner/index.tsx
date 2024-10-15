@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRouter } from "expo-router";
 import MaskedView from "@react-native-masked-view/masked-view";
+import { usePartnerStore } from "@/store/partner.store";
+import { Alert } from "react-native";
 
 const getRandomGradient = () => {
   const randomIndex = Math.floor(Math.random() * gradients.length);
@@ -44,6 +46,7 @@ const AddPartnerScreen = () => {
   const morphScale = useRef(new Animated.Value(0.8)).current;
   const morphOpacity = useRef(new Animated.Value(0)).current;
 
+  const { addPartner } = usePartnerStore();
   const router = useRouter();
 
   const suggestedInterests = [
@@ -211,22 +214,24 @@ const AddPartnerScreen = () => {
     morphOut(5);
   };
 
-  // Add partner to DB here
-  const handleFinish = () => {
-    console.log("Partner Info:", {
-      gender: selectedGender,
-      age: partnerAge,
-      name: partnerName,
-      personality: selectedPersonality,
-      loves: partnerLoves.join(", "),
-      diet:
-        selectedDiet.length > 0
-          ? selectedDiet.join(", ")
-          : "No dietary preference",
-      avatarGradient: partnerGradient,
-    });
+  const handleFinish = async () => {
+    try {
+      const partnerData = {
+        name: partnerName,
+        age: parseInt(partnerAge, 10),
+        gender: selectedGender as 'Male' | 'Female',
+        personalityType: selectedPersonality as 'Introvert' | 'Extrovert',
+        interests: partnerLoves,
+        dietaryPreferences: selectedDiet.length > 0 ? selectedDiet : null,
+      };
 
-    router.replace("/partners");
+      await addPartner(partnerData);
+      Alert.alert('Success', 'Partner added successfully!');
+      router.replace('/partners');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add partner.');
+      console.error(error);
+    }
   };
 
   const handleBack = () => {

@@ -6,25 +6,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
-const dotenv = require("dotenv");
-dotenv.config();
+exports.PartnerModule = void 0;
 const common_1 = require("@nestjs/common");
-const auth_module_1 = require("./auth/auth.module");
 const mongoose_1 = require("@nestjs/mongoose");
-const users_module_1 = require("./users/users.module");
-const partner_module_1 = require("./partner/partner.module");
-let AppModule = class AppModule {
+const partner_service_1 = require("./partner.service");
+const partner_schema_1 = require("./schemas/partner.schema");
+const partner_controller_1 = require("./partner.controller");
+let PartnerModule = class PartnerModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.PartnerModule = PartnerModule;
+exports.PartnerModule = PartnerModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            auth_module_1.AuthModule,
-            mongoose_1.MongooseModule.forRoot(process.env.MONGODB_URI),
-            users_module_1.UsersModule,
-            partner_module_1.PartnerModule,
-        ]
+        imports: [mongoose_1.MongooseModule.forFeature([{ name: partner_schema_1.Partner.name, schema: partner_schema_1.PartnerSchema }])],
+        controllers: [partner_controller_1.PartnerController],
+        providers: [partner_service_1.PartnerService],
+        exports: [partner_service_1.PartnerService],
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], PartnerModule);
+//# sourceMappingURL=partner.module.js.map
