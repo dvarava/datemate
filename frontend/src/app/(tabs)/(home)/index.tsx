@@ -8,6 +8,7 @@ import {
   Image,
   ViewStyle,
   Alert,
+  Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontSize } from "@/constants/tokens";
@@ -17,6 +18,7 @@ import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import HomeCalendar from "@/components/HomeCalendar";
 import * as Notifications from "expo-notifications";
 import RobotSvg from "@/svg/robot";
+import { useAuthStore } from '@/store/authStore';
 
 interface HolidayInfo {
   name: string;
@@ -158,6 +160,7 @@ const RegularCard: React.FC<CardProps> = ({ children, style }) => (
 );
 
 const HomeScreen = () => {
+  const { logout } = useAuthStore();
   const router = useRouter();
   const navigateBlocked = useRef(false);
   const [isNotified, setIsNotified] = useState(false);
@@ -335,6 +338,16 @@ const HomeScreen = () => {
         </Text>
       </View>
     </View>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Button
+        title="Logout"
+        onPress={() => {
+          logout();
+        }}
+      />
+    </View>
+      
+    </ScrollView>
   );
 };
 

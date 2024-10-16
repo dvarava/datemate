@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import AuthScreen from "@/auth/AuthScreen";
 import { useAuthStore } from "@/store/authStore";
@@ -15,9 +15,13 @@ const App = () => {
     "Nunito-Italic": require("assets/fonts/Nunito-Italic.ttf"),
   });
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, validateSession } = useAuthStore();
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    validateSession();
+  }, []);
+
+  if (!fontsLoaded || isAuthenticated === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#0000ff" />
