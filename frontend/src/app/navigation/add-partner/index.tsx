@@ -439,10 +439,10 @@ const AddPartnerScreen = () => {
               <Text style={styles.errorText}>{lovesError}</Text>
             )}
             <Text style={styles.helperText}>
-              *Answer as broad as you can, following the example shown below.*
+              *Answer as broad as you can, following the example below.*
             </Text>
             <Text style={styles.exampleText}>
-              Example: Sunsets, concerts, Thai food, art, John Wick, horses.
+              Example: Sunset, Thai Food, Art, Stranger Things.
             </Text>
 
             <View style={styles.suggestedContainer}>
