@@ -1,31 +1,20 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
-
-type Partner = {
-  _id: string;
-  name: string;
-  age: number;
-  gender: 'Male' | 'Female';
-  personalityType: 'Introvert' | 'Extrovert';
-  interests: string[];
-  dietaryPreferences?: string | null; 
-  avatarGradient?: string[];
-};
+import { Partner, PartnerInput } from './types/partner';
 
 type PartnerState = {
   partners: Partner[];
-  addPartner: (partner: Omit<Partner, 'id'>) => Promise<void>;
+  addPartner: (partner: PartnerInput) => Promise<void>;
   fetchPartners: () => Promise<void>;
   editPartner: (partnerId: string, partnerData: Partial<Partner>) => Promise<void>;
   deletePartner: (partnerId: string) => Promise<void>;
 };
 
-
 export const usePartnerStore = create<PartnerState>((set) => ({
   partners: [],
 
-  addPartner: async (partner: any) => {
+  addPartner: async (partner: PartnerInput) => {
     try {
       const userId = await SecureStore.getItemAsync('userId');
       if (!userId) {
@@ -43,7 +32,7 @@ export const usePartnerStore = create<PartnerState>((set) => ({
         throw new Error('Failed to add partner');
       }
 
-      const newPartner = await response.json();
+      const newPartner: Partner = await response.json();
       set((state) => ({
         partners: [...state.partners, newPartner],
       }));

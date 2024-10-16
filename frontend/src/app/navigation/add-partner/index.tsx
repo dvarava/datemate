@@ -16,6 +16,7 @@ import { useNavigation, useRouter } from "expo-router";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { usePartnerStore } from "@/store/partner.store";
 import { Alert } from "react-native";
+import { PartnerInput } from "@/store/types/partner";
 
 const getRandomGradient = () => {
   const randomIndex = Math.floor(Math.random() * gradients.length);
@@ -216,13 +217,14 @@ const AddPartnerScreen = () => {
 
   const handleFinish = async () => {
     try {
-      const partnerData = {
+      const partnerData: PartnerInput = {
         name: partnerName,
         age: parseInt(partnerAge, 10),
         gender: selectedGender as 'Male' | 'Female',
         personalityType: selectedPersonality as 'Introvert' | 'Extrovert',
         interests: partnerLoves,
         dietaryPreferences: selectedDiet.length > 0 ? selectedDiet.join(', ') : null,
+        avatarGradient: partnerGradient,
       };
   
       await addPartner(partnerData);
