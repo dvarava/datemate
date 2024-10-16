@@ -32,13 +32,10 @@ let PartnerService = class PartnerService {
     }
     async deletePartner(partnerId) {
         try {
-            console.log("Attempting to delete partner with ID:", partnerId);
             const result = await this.partnerModel.findByIdAndDelete(partnerId).exec();
             if (!result) {
-                console.log("Partner not found or already deleted.");
                 throw new Error('Partner not found or already deleted');
             }
-            console.log("Partner deleted successfully:", result);
             return result;
         }
         catch (error) {

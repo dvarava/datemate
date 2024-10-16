@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Avatar from "@/components/Avatar";
-import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontSize } from "@/constants/tokens";
 import { DateHistory } from "@/types/dateHistory";
 import DateHistoryList from "@/components/DateHistoryList";
@@ -429,7 +428,7 @@ const PartnerDetailsScreen: React.FC = () => {
         {/* Date History List */}
         <DateHistoryList
           histories={histories}
-          onFavoriteToggle={handleFavoriteToggle}
+          onActionPress={handleFavoriteToggle}
           showAvatar={false}
         />
 

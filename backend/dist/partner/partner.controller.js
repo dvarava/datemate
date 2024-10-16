@@ -26,7 +26,6 @@ let PartnerController = class PartnerController {
         return this.partnerService.findPartnersByUser(userId);
     }
     async deletePartner(partnerId) {
-        console.log("Received delete request for partner ID:", partnerId);
         return this.partnerService.deletePartner(partnerId);
     }
 };
