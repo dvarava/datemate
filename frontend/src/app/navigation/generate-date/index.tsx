@@ -749,7 +749,7 @@ const GenerateDateScreen = () => {
                   value={duration}
                   onValueChange={(value) => setDuration(value)}
                   minimumValue={30}
-                  maximumValue={480}
+                  maximumValue={300}
                   step={30}
                 />
                 <Text style={styles.sliderValue}>
