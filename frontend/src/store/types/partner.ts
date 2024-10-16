@@ -1,3 +1,5 @@
+import { DateHistory } from "@/types/dateHistory";
+
 export type Partner = {
     _id: string;
     name: string;
@@ -7,6 +9,7 @@ export type Partner = {
     interests: string[];
     dietaryPreferences?: string | null;
     avatarGradient?: string[];
+
   };
   
   export type PartnerInput = {

@@ -5,4 +5,5 @@ export declare class PartnerController {
     createPartner(createPartnerDto: any): Promise<import("./schemas/partner.schema").Partner>;
     getPartners(userId: string): Promise<import("./schemas/partner.schema").Partner[]>;
     deletePartner(partnerId: string): Promise<any>;
+    editPartner(partnerId: string, partnerData: any): Promise<import("./schemas/partner.schema").Partner>;
 }

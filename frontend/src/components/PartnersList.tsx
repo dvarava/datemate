@@ -11,13 +11,7 @@ interface PartnersListProps {
   onSelect?: (partner: Profile) => void;
 }
 
-const PartnersList: React.FC<PartnersListProps> = ({
-  profiles,
-  showActions = true,
-  onEdit,
-  onDelete,
-  onSelect,
-}) => {
+const PartnersList: React.FC<PartnersListProps> = ({ profiles, showActions = true, onEdit, onDelete, onSelect }) => {
   return (
     <FlatList
       data={profiles}

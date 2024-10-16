@@ -7,11 +7,12 @@ type PartnerState = {
   partners: Partner[];
   addPartner: (partner: PartnerInput) => Promise<void>;
   fetchPartners: () => Promise<void>;
+  fetchPartnerById: (partnerId: string) => Partner | undefined;
   editPartner: (partnerId: string, partnerData: Partial<Partner>) => Promise<void>;
   deletePartner: (partnerId: string) => Promise<void>;
 };
 
-export const usePartnerStore = create<PartnerState>((set) => ({
+export const usePartnerStore = create<PartnerState>((set, get) => ({
   partners: [],
 
   addPartner: async (partner: PartnerInput) => {
@@ -63,6 +64,11 @@ export const usePartnerStore = create<PartnerState>((set) => ({
     }
   },
 
+  fetchPartnerById: (partnerId: string) => {
+    const state = get();
+    return state.partners.find((partner) => partner._id === partnerId);
+  },
+
   editPartner: async (partnerId: string, partnerData: Partial<Partner>) => {
     try {
       const response = await fetch(`http://localhost:3000/partners/${partnerId}`, {
@@ -82,7 +88,6 @@ export const usePartnerStore = create<PartnerState>((set) => ({
         ),
       }));
 
-      Alert.alert('Success', 'Partner updated successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to edit partner');
       console.error('Edit partner error:', error);
@@ -103,7 +108,6 @@ export const usePartnerStore = create<PartnerState>((set) => ({
         partners: state.partners.filter((p) => p._id !== partnerId),
       }));
     
-      Alert.alert('Success', 'Partner deleted successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to delete partner');
       console.error('Delete partner error:', error);

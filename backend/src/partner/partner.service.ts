@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { Partner, PartnerDocument } from './schemas/partner.schema';
 
 @Injectable()
@@ -30,5 +30,18 @@ export class PartnerService {
       console.error('Error deleting partner:', error);
       throw new Error('Failed to delete partner');
     }
+  }
+  async editPartner(partnerId: string, partnerData: any): Promise<Partner> {
+    const updatedPartner = await this.partnerModel.findByIdAndUpdate(
+      partnerId,
+      { $set: partnerData },
+      { new: true },
+    ).exec();
+
+    if (!updatedPartner) {
+      throw new NotFoundException('Partner not found');
+    }
+
+    return updatedPartner;
   }
 }

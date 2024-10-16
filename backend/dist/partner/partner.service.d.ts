@@ -6,4 +6,5 @@ export declare class PartnerService {
     createPartner(partnerData: Partial<Partner>): Promise<Partner>;
     findPartnersByUser(userId: string): Promise<Partner[]>;
     deletePartner(partnerId: string): Promise<any>;
+    editPartner(partnerId: string, partnerData: any): Promise<Partner>;
 }

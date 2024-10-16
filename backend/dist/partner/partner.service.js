@@ -43,6 +43,13 @@ let PartnerService = class PartnerService {
             throw new Error('Failed to delete partner');
         }
     }
+    async editPartner(partnerId, partnerData) {
+        const updatedPartner = await this.partnerModel.findByIdAndUpdate(partnerId, { $set: partnerData }, { new: true }).exec();
+        if (!updatedPartner) {
+            throw new common_1.NotFoundException('Partner not found');
+        }
+        return updatedPartner;
+    }
 };
 exports.PartnerService = PartnerService;
 exports.PartnerService = PartnerService = __decorate([

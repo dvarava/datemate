@@ -18,7 +18,9 @@ import { colors, fontSize } from "@/constants/tokens";
 import { DateHistory } from "@/types/dateHistory";
 import DateHistoryList from "@/components/DateHistoryList";
 import Dropdown from "@/components/Dropdown";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { usePartnerStore } from "@/store/partner.store";
+import { Partner } from "../../../store/types/partner";
 
 const dietIcons = {
   Vegan: require("@/assets/diet_icons/vegan.png"),
@@ -47,28 +49,36 @@ const darkDietIcons = {
 const dietOptions = Object.keys(dietIcons);
 
 const PartnerDetailsScreen: React.FC = () => {
-  // Hardcoded data
-  const [selectedDiet, setSelectedDiet] = useState<string[]>([
-    "Vegan",
-    "Gluten-free",
-  ]);
-  const [partnerName, setPartnerName] = useState("Anna");
-  const [partnerAge, setPartnerAge] = useState("21");
-  const [partnerPersonality, setPartnerPersonality] = useState("Introvert");
+  const { partnerId } = useLocalSearchParams();
+  const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
 
-  const [partnerLoves, setPartnerLoves] = useState<string[]>([
-    "Sunsets",
-    "concerts",
-    "Thai food",
-    "art",
-    "John Wick",
-    "horses",
-  ]);
+  const partner = fetchPartnerById(partnerId as string);
+  useEffect(() => {
+    if (partner) {
+      setPartnerName(partner.name);
+      setPartnerAge(partner.age.toString());
+      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
+      setPartnerLoves(partner.interests);
+
+      if (Array.isArray(partner.dietaryPreferences)) {
+        setSelectedDiet(partner.dietaryPreferences);
+      } else if (typeof partner.dietaryPreferences === 'string') {
+        setSelectedDiet(partner.dietaryPreferences.split(","));
+      } else {
+        setSelectedDiet([]);
+      }
+    }
+  }, [partner]);
+
+  const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerAge, setPartnerAge] = useState("");
+  const [partnerPersonality, setPartnerPersonality] = useState("");
+  const [partnerLoves, setPartnerLoves] = useState<string[]>([]);
   const [inputText, setInputText] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDietModalVisible, setIsDietModalVisible] = useState(false);
-
   const [isLovesValid, setIsLovesValid] = useState(true);
   const [lovesError, setLovesError] = useState("");
   const [isNameValid, setIsNameValid] = useState(true);
@@ -126,9 +136,14 @@ const PartnerDetailsScreen: React.FC = () => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            console.log("Partner deleted");
-            router.back();
+          onPress: async () => {
+            try {
+              await deletePartner(partnerId as string);
+              console.log("Partner deleted");
+              router.back();
+            } catch (error) {
+              console.error("Failed to delete partner:", error);
+            }
           },
         },
       ],
@@ -136,10 +151,10 @@ const PartnerDetailsScreen: React.FC = () => {
     );
   };
 
-  const handleSave = () => {  
+  const handleSave = async () => {
     handleNameSubmit();
     handleAgeSubmit();
-  
+
     if (partnerLoves.length < 3) {
       setIsLovesValid(false);
       setLovesError("Please enter at least 3 interests.");
@@ -147,15 +162,26 @@ const PartnerDetailsScreen: React.FC = () => {
       setIsLovesValid(true);
       setLovesError("");
     }
-  
+
     if (!isNameValid || !isAgeValid || !isLovesValid) {
       return;
     }
-  
-    setIsEditing(false);
-    console.log("Saving updated partner details...");
-    // Add PUT request to update partner details in the database here
-  };  
+
+    const updatedPartnerData: Partial<Partner> = {
+      name: partnerName,
+      age: parseInt(partnerAge),
+      personalityType: partnerPersonality as "Introvert" | "Extrovert",
+      interests: partnerLoves,
+      dietaryPreferences: selectedDiet.join(","),
+    };
+
+    try {
+      await editPartner(partnerId as string, updatedPartnerData);
+      setIsEditing(false);
+    } catch (error) {
+    }
+  };
+ 
 
   const handleDietSelect = (diet: string) => {
     setSelectedDiet((prev) =>
