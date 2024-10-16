@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PartnerController = void 0;
 const common_1 = require("@nestjs/common");
 const partner_service_1 = require("./partner.service");
+const mongoose_1 = require("mongoose");
 let PartnerController = class PartnerController {
     constructor(partnerService) {
         this.partnerService = partnerService;
@@ -26,8 +27,13 @@ let PartnerController = class PartnerController {
         return this.partnerService.findPartnersByUser(userId);
     }
     async deletePartner(partnerId) {
-        console.log("Received delete request for partner ID:", partnerId);
         return this.partnerService.deletePartner(partnerId);
+    }
+    async editPartner(partnerId, partnerData) {
+        if (!mongoose_1.Types.ObjectId.isValid(partnerId)) {
+            throw new common_1.BadRequestException('Invalid partner ID');
+        }
+        return this.partnerService.editPartner(partnerId, partnerData);
     }
 };
 exports.PartnerController = PartnerController;
@@ -52,6 +58,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PartnerController.prototype, "deletePartner", null);
+__decorate([
+    (0, common_1.Patch)(':partnerId'),
+    __param(0, (0, common_1.Param)('partnerId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PartnerController.prototype, "editPartner", null);
 exports.PartnerController = PartnerController = __decorate([
     (0, common_1.Controller)('partners'),
     __metadata("design:paramtypes", [partner_service_1.PartnerService])

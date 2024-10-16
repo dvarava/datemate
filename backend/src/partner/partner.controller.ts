@@ -1,5 +1,7 @@
-import { Controller, Post, Get, Body, Query, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Delete, Param, Patch, BadRequestException } from '@nestjs/common';
 import { PartnerService } from './partner.service';
+import { Types } from 'mongoose';
+
 
 @Controller('partners')
 export class PartnerController {
@@ -18,5 +20,16 @@ export class PartnerController {
   @Delete(':partnerId')
   async deletePartner(@Param('partnerId') partnerId: string) {
     return this.partnerService.deletePartner(partnerId);
-}
+  }
+
+  @Patch(':partnerId')
+  async editPartner(
+    @Param('partnerId') partnerId: string,
+    @Body() partnerData: any,
+  ) {
+    if (!Types.ObjectId.isValid(partnerId)) {
+      throw new BadRequestException('Invalid partner ID');
+    }
+    return this.partnerService.editPartner(partnerId, partnerData);
+  }
 }

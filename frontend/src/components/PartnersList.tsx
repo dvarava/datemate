@@ -31,7 +31,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ profile, showActions = true, 
     } else {
       router.push({
         pathname: `/navigation/partner-details`,
-        params: { id: profile.id, name: profile.name },
+        params: { partnerId: profile.id, name: profile.name },
       });
     }
   };

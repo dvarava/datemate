@@ -228,10 +228,8 @@ const AddPartnerScreen = () => {
       };
   
       await addPartner(partnerData);
-      Alert.alert('Success', 'Partner added successfully!');
       router.replace('/partners');
     } catch (error) {
-      Alert.alert('Error', 'Failed to add partner.');
       console.error(error);
     }
   };
