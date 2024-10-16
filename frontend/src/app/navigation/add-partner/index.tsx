@@ -222,9 +222,9 @@ const AddPartnerScreen = () => {
         gender: selectedGender as 'Male' | 'Female',
         personalityType: selectedPersonality as 'Introvert' | 'Extrovert',
         interests: partnerLoves,
-        dietaryPreferences: selectedDiet.length > 0 ? selectedDiet : null,
+        dietaryPreferences: selectedDiet.length > 0 ? selectedDiet.join(', ') : null,
       };
-
+  
       await addPartner(partnerData);
       Alert.alert('Success', 'Partner added successfully!');
       router.replace('/partners');

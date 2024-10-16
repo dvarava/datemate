@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type PartnerDocument = Partner & Document;
 
@@ -20,11 +20,11 @@ export class Partner {
   @Prop({ required: true })
   interests: string[];
 
-  @Prop({ required: false })
+  @Prop({ type: [String], default: null })
   dietaryPreferences?: string[] | null;
 
-  @Prop({ required: true })
-  userId: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
 }
 
 export const PartnerSchema = SchemaFactory.createForClass(Partner);

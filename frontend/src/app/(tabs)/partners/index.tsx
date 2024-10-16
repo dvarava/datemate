@@ -19,11 +19,11 @@ const PartnersScreen: React.FC = () => {
   }, []);
 
   const handleEditProfile = (id: string) => {
-    const updatedName = "New Name"; // Example placeholder, you can replace with actual input logic
+    const updatedName = "New Name";
     editPartner(id, { name: updatedName });
   };
 
-  const handleDeleteProfile = (id: string) => {
+  const handleDeleteProfile = (id: string) => {  
     Alert.alert(
       "Confirm Delete",
       "Are you sure you want to delete this profile?",
@@ -36,7 +36,10 @@ const PartnersScreen: React.FC = () => {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deletePartner(id);
+            if (!id) {
+              return;
+            }
+            deletePartner(id); 
           },
         },
       ]
@@ -48,11 +51,11 @@ const PartnersScreen: React.FC = () => {
   };
 
   const partnerProfiles = partners.map(partner => ({
-    id: partner.id || String(Math.random()),  // Unique fallback if id is missing (not recommended, but ensures no duplicate keys)
+    id: partner._id,
     name: partner.name,
     age: partner.age,
     gender: partner.gender,
-    avatarGradient: partner.avatarGradient || ['#4469d2', '#fff'],  // Fallback for missing gradients
+    avatarGradient: partner.avatarGradient || ['#4469d2', '#fff'],
   }));
 
   return (
