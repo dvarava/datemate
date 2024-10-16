@@ -34,19 +34,6 @@ const calculateDaysUntilDate = (targetDate: Date): number => {
   return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 };
 
-const getNthDayInMonth = (
-  year: number,
-  month: number,
-  dayOfWeek: number,
-  n: number
-): Date => {
-  let date = new Date(year, month, 1);
-  const firstDayOfWeek = date.getDay();
-  let dayOffset = (dayOfWeek - firstDayOfWeek + 7) % 7;
-  date.setDate(1 + dayOffset + (n - 1) * 7);
-  return date;
-};
-
 const holidays = [
   { name: "Commitment Day", date: new Date(new Date().getFullYear(), 0, 1) },
   {
@@ -177,6 +164,7 @@ const HomeScreen = () => {
   const router = useRouter();
   const navigateBlocked = useRef(false);
   const [isNotified, setIsNotified] = useState(false);
+  const [notificationId, setNotificationId] = useState<string | null>(null);
   const isPremium = true;
 
   const handleBuyNow = () => {
@@ -190,39 +178,45 @@ const HomeScreen = () => {
   };
 
   const handleNotifyMe = async () => {
-    if (isNotified) {
-      Alert.alert("Notification", "Reminder is already set!");
-      return;
+    if (isNotified && notificationId) {
+      await Notifications.cancelScheduledNotificationAsync(notificationId);
+      setIsNotified(false);
+      setNotificationId(null);
+      Alert.alert("Reminder", "The reminder has been turned off.");
+    } else {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Notifications permission is required!"
+        );
+        return;
+      }
+
+      const notification = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${nearestHoliday.name} is coming!`,
+          body: `Only ${nearestHoliday.daysLeft} days left until ${nearestHoliday.name}!`,
+          sound: true,
+        },
+        trigger: {
+          seconds: nearestHoliday.daysLeft * 24 * 60 * 60,
+        },
+      });
+
+      setIsNotified(true);
+      setNotificationId(notification);
+      Alert.alert(
+        "Reminder Set",
+        `We will remind you about ${nearestHoliday.name}!`
+      );
     }
-
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Denied", "Notifications permission is required!");
-      return;
-    }
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: `${nearestHoliday.name} is coming!`,
-        body: `Only ${nearestHoliday.daysLeft} days left until ${nearestHoliday.name}!`,
-        sound: true,
-      },
-      trigger: {
-        seconds: nearestHoliday.daysLeft * 24 * 60 * 60,
-      },
-    });
-
-    setIsNotified(true);
-    Alert.alert(
-      "Reminder Set",
-      `We will remind you about ${nearestHoliday.name}!`
-    );
   };
 
   const nearestHoliday = getNearestHoliday();
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       {/* Calendar Component */}
       <View style={styles.calendarWrapper}>
         <HomeCalendar specialDates={specialDates} />
@@ -300,22 +294,33 @@ const HomeScreen = () => {
           }
           regularCard={
             <RegularCard style={styles.premiumCard}>
-              <Text style={styles.cardTitle}>UPCOMING</Text>
+              {/* <Text style={styles.cardTitle}>UPCOMING</Text> */}
               <Text style={styles.upcomingText}>
                 {nearestHoliday.daysLeft} Days
               </Text>
               <Text style={styles.untilText}>until {nearestHoliday.name}!</Text>
               <TouchableOpacity
-                style={styles.notifyButton}
+                style={[
+                  styles.notifyButton,
+                  isNotified && styles.notifyButtonActive,
+                ]}
                 onPress={handleNotifyMe}
               >
-                <Text style={styles.notifyButtonText}>
+                <Text
+                  style={[
+                    styles.notifyButtonText,
+                    isNotified && styles.notifyButtonTextActive,
+                  ]}
+                >
                   {isNotified ? "Reminder On" : "Notify Me"}
                 </Text>
                 <Ionicons
                   name={isNotified ? "notifications" : "notifications-outline"}
                   size={16}
-                  color={colors.secondaryBackground}
+                  style={[
+                    styles.notifyIcon,
+                    isNotified && styles.notifyIconActive,
+                  ]}
                 />
               </TouchableOpacity>
             </RegularCard>
@@ -332,6 +337,7 @@ const HomeScreen = () => {
           Let's settle this - pineapple on pizza: bold move or total disaster?
         </Text>
       </View>
+    </View>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Button
         title="Logout"
@@ -389,7 +395,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: 160,
+    height: 150,
     width: 100,
     paddingTop: 5,
   },
@@ -418,7 +424,7 @@ const styles = StyleSheet.create({
   },
   upcomingText: {
     color: colors.primary,
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "bold",
     fontFamily: "Nunito-Black",
     marginRight: 8,
@@ -477,6 +483,15 @@ const styles = StyleSheet.create({
   },
   notifyIcon: {
     color: colors.secondaryBackground,
+  },
+  notifyIconActive: {
+    color: "#666",
+  },
+  notifyButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  notifyButtonTextActive: {
+    color: "#666",
   },
   darkText: {
     color: "black",

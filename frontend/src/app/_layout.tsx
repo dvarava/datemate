@@ -29,13 +29,19 @@ const App = () => {
     );
   }
 
-  return isAuthenticated ? (
+  // return isAuthenticated ? (
+  //   <SafeAreaProvider>
+  //     <RootNavigation />
+  //     <StatusBar style="auto" />
+  //   </SafeAreaProvider>
+  // ) : (
+  //   <AuthScreen />
+  // );
+  return  (
     <SafeAreaProvider>
       <RootNavigation />
       <StatusBar style="auto" />
     </SafeAreaProvider>
-  ) : (
-    <AuthScreen />
   );
 };
 
