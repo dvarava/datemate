@@ -29,7 +29,7 @@ const PartnersCard: React.FC<PartnersCardProps> = ({
     } else {
       router.push({
         pathname: `/navigation/partner-details`,
-        params: { id: profile.id, name: profile.name },
+        params: { partnerId: profile.id, name: profile.name },
       });
     }
   };
@@ -43,9 +43,6 @@ const PartnersCard: React.FC<PartnersCardProps> = ({
 
       {showActions && (
         <View style={styles.actionsContainer}>
-          <TouchableOpacity onPress={handleSelect} style={styles.iconButton}>
-            <Ionicons name="pencil" size={20} color="#fff" />
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => onDelete?.(profile.id)} style={styles.iconButton}>
             <Ionicons name="trash" size={20} color="#fff" />
           </TouchableOpacity>
