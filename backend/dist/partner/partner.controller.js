@@ -25,10 +25,8 @@ let PartnerController = class PartnerController {
     async getPartners(userId) {
         return this.partnerService.findPartnersByUser(userId);
     }
-    async editPartner(partnerId, updatePartnerDto) {
-        return this.partnerService.updatePartner(partnerId, updatePartnerDto);
-    }
     async deletePartner(partnerId) {
+        console.log("Received delete request for partner ID:", partnerId);
         return this.partnerService.deletePartner(partnerId);
     }
 };
@@ -47,14 +45,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PartnerController.prototype, "getPartners", null);
-__decorate([
-    (0, common_1.Patch)(':partnerId'),
-    __param(0, (0, common_1.Param)('partnerId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], PartnerController.prototype, "editPartner", null);
 __decorate([
     (0, common_1.Delete)(':partnerId'),
     __param(0, (0, common_1.Param)('partnerId')),

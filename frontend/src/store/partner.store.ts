@@ -3,18 +3,19 @@ import * as SecureStore from 'expo-secure-store';
 import { Alert } from 'react-native';
 
 type Partner = {
-  id?: string;
+  _id: string;
   name: string;
   age: number;
   gender: 'Male' | 'Female';
   personalityType: 'Introvert' | 'Extrovert';
   interests: string[];
-  dietaryPreferences?: string | null;
+  dietaryPreferences?: string | null; 
   avatarGradient?: string[];
 };
 
 type PartnerState = {
   partners: Partner[];
+  addPartner: (partner: Omit<Partner, 'id'>) => Promise<void>;
   fetchPartners: () => Promise<void>;
   editPartner: (partnerId: string, partnerData: Partial<Partner>) => Promise<void>;
   deletePartner: (partnerId: string) => Promise<void>;
@@ -59,12 +60,12 @@ export const usePartnerStore = create<PartnerState>((set) => ({
         Alert.alert('Error', 'User not authenticated');
         return;
       }
-
+  
       const response = await fetch(`http://localhost:3000/partners?userId=${userId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch partners');
       }
-
+  
       const partners = await response.json();
       set({ partners });
     } catch (error) {
@@ -88,7 +89,7 @@ export const usePartnerStore = create<PartnerState>((set) => ({
       const updatedPartner = await response.json();
       set((state) => ({
         partners: state.partners.map((p) =>
-          p.id === partnerId ? updatedPartner : p
+          p._id === partnerId ? updatedPartner : p
         ),
       }));
 
@@ -100,19 +101,19 @@ export const usePartnerStore = create<PartnerState>((set) => ({
   },
 
   deletePartner: async (partnerId: string) => {
-    try {
+    try {    
       const response = await fetch(`http://localhost:3000/partners/${partnerId}`, {
         method: 'DELETE',
       });
-
+    
       if (!response.ok) {
         throw new Error('Failed to delete partner');
       }
-
+    
       set((state) => ({
-        partners: state.partners.filter((p) => p.id !== partnerId),
+        partners: state.partners.filter((p) => p._id !== partnerId),
       }));
-
+    
       Alert.alert('Success', 'Partner deleted successfully');
     } catch (error) {
       Alert.alert('Error', 'Failed to delete partner');

@@ -23,16 +23,28 @@ let PartnerService = class PartnerService {
     }
     async createPartner(partnerData) {
         const newPartner = new this.partnerModel(partnerData);
-        return newPartner.save();
+        const result = await newPartner.save();
+        return result;
     }
     async findPartnersByUser(userId) {
-        return this.partnerModel.find({ userId }).exec();
-    }
-    async updatePartner(partnerId, updateData) {
-        return this.partnerModel.findByIdAndUpdate(partnerId, updateData, { new: true }).exec();
+        const partners = await this.partnerModel.find({ userId }).exec();
+        return partners;
     }
     async deletePartner(partnerId) {
-        return this.partnerModel.findByIdAndDelete(partnerId).exec();
+        try {
+            console.log("Attempting to delete partner with ID:", partnerId);
+            const result = await this.partnerModel.findByIdAndDelete(partnerId).exec();
+            if (!result) {
+                console.log("Partner not found or already deleted.");
+                throw new Error('Partner not found or already deleted');
+            }
+            console.log("Partner deleted successfully:", result);
+            return result;
+        }
+        catch (error) {
+            console.error('Error deleting partner:', error);
+            throw new Error('Failed to delete partner');
+        }
     }
 };
 exports.PartnerService = PartnerService;
