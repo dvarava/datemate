@@ -18,7 +18,7 @@ import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import HomeCalendar from "@/components/HomeCalendar";
 import * as Notifications from "expo-notifications";
 import RobotSvg from "@/svg/robot";
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from "@/store/authStore";
 
 interface HolidayInfo {
   name: string;
@@ -337,17 +337,15 @@ const HomeScreen = () => {
           Let's settle this - pineapple on pizza: bold move or total disaster?
         </Text>
       </View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Button
+          title="Logout"
+          onPress={() => {
+            logout();
+          }}
+        />
+      </View>
     </View>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Button
-        title="Logout"
-        onPress={() => {
-          logout();
-        }}
-      />
-    </View>
-      
-    </ScrollView>
   );
 };
 
