@@ -8,6 +8,7 @@ import {
   Animated,
   Image,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { colors, fontSize, dietIcons, gradients } from "@/constants/tokens";
 import { Ionicons } from "@expo/vector-icons";
@@ -402,7 +403,7 @@ const AddPartnerScreen = () => {
         )}
 
         {step === 4 && (
-          <View>
+          <ScrollView>
             <Text style={styles.questionText}>
               What does {selectedGender === "Female" ? "she" : "he"} love?
             </Text>
@@ -455,7 +456,7 @@ const AddPartnerScreen = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </ScrollView>
         )}
 
         {step === 5 && (
