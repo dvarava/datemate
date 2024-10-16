@@ -257,7 +257,7 @@ const PartnerDetailsScreen: React.FC = () => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {/* Partner Profile Card */}
-        <View style={styles.profileCard}>
+        <View style={styles.partnersCard}>
           <View style={styles.profileHeader}>
             <View style={styles.avatarNameContainer}>
               <Avatar gradient={["#ff0262", "#ffffff"]} style={styles.avatar} />
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 25,
   },
-  profileCard: {
+  partnersCard: {
     backgroundColor: colors.primary,
     borderRadius: 15,
     padding: 25,
