@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Modal,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +22,7 @@ import PartnersList from "@/components/PartnersList";
 import Avatar from "@/components/Avatar";
 import CustomSlider from "@/components/CustomSlider";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { useDateStore } from "@/store/dateStore";
 
 const GenerateDateScreen = () => {
   const router = useRouter();
@@ -49,6 +51,9 @@ const GenerateDateScreen = () => {
   const [searchLocationModalVisible, setSearchLocationModalVisible] =
     useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const { generateDatePlan } = useDateStore();
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -87,7 +92,7 @@ const GenerateDateScreen = () => {
     setShowInfo(null);
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (isFetchingLocation) {
       Alert.alert("Location Error", "Please wait until we get your location.");
       return;
@@ -124,7 +129,7 @@ const GenerateDateScreen = () => {
         ? currentLocationAddress
         : otherLocationAddress;
 
-    console.log({
+    const data = {
       activityAmount,
       budget,
       moodSelection,
@@ -136,14 +141,22 @@ const GenerateDateScreen = () => {
       locationCoords,
       locationAddress,
       partners: selectedPartner,
-    });
+    };
 
-    router.push({
-      pathname: "/navigation/date-plan",
-      params: {
-        showRegenerateButton: "true",
-      },
-    });
+    setIsGenerating(true);
+    try {
+      await generateDatePlan(data);
+      setIsGenerating(false);
+      router.push({
+        pathname: "/navigation/date-plan",
+        params: {
+          showRegenerateButton: "true",
+        },
+      });
+    } catch (error) {
+      setIsGenerating(false);
+      Alert.alert("Error", "Failed to generate date plan.");
+    }
   };
 
   const handleMoodSelection = (mood: string) => {
@@ -752,11 +765,11 @@ const GenerateDateScreen = () => {
             <TouchableOpacity
               style={[
                 styles.generateButton,
-                (!activityAmount || isFetchingLocation) &&
+                (isGenerating || isFetchingLocation) &&
                   styles.generateButtonDisabled,
               ]}
               onPress={handleGenerate}
-              disabled={isFetchingLocation || !activityAmount}
+              disabled={isGenerating || isFetchingLocation}
             >
               <LinearGradient
                 colors={[colors.primary, colors.secondary]}
@@ -764,7 +777,11 @@ const GenerateDateScreen = () => {
                 end={{ x: 1, y: 3 }}
                 style={styles.generateButtonGradient}
               >
-                <Text style={styles.generateButtonText}>GENERATE</Text>
+                {isGenerating ? (
+                  <ActivityIndicator size="small" color={colors.background} />
+                ) : (
+                  <Text style={styles.generateButtonText}>GENERATE</Text>
+                )}
               </LinearGradient>
             </TouchableOpacity>
           </View>

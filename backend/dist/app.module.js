@@ -14,6 +14,7 @@ const auth_module_1 = require("./auth/auth.module");
 const mongoose_1 = require("@nestjs/mongoose");
 const users_module_1 = require("./users/users.module");
 const partner_module_1 = require("./partner/partner.module");
+const date_generation_module_1 = require("./date-generation/date-generation.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,6 +25,7 @@ exports.AppModule = AppModule = __decorate([
             mongoose_1.MongooseModule.forRoot(process.env.MONGODB_URI),
             users_module_1.UsersModule,
             partner_module_1.PartnerModule,
+            date_generation_module_1.DateGenerationModule,
         ]
     })
 ], AppModule);
