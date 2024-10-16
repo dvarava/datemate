@@ -290,7 +290,7 @@ const DatePlanScreen: React.FC = () => {
                 />
               </TouchableOpacity>
 
-              <Text style={styles.modalTitle}>Add to Calendar</Text>
+              <Text style={styles.modalTitle}>Schedule Your Date</Text>
 
               <View style={styles.datePickerWrapper}>
                 {showDatePicker && (

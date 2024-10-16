@@ -202,6 +202,17 @@ const GenerateDateScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        visible={isGenerating}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Generating date plan...</Text>
+        </View>
+      </Modal>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.scrollViewContent}
@@ -749,7 +760,7 @@ const GenerateDateScreen = () => {
                   value={duration}
                   onValueChange={(value) => setDuration(value)}
                   minimumValue={30}
-                  maximumValue={480}
+                  maximumValue={300}
                   step={30}
                 />
                 <Text style={styles.sliderValue}>
@@ -802,6 +813,18 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 70,
     padding: 25,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  loadingText: {
+    marginTop: 20,
+    color: colors.primary,
+    fontSize: fontSize.md,
+    fontFamily: "Nunito-Bold",
   },
   partnerContainer: {
     marginBottom: 20,

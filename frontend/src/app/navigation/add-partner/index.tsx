@@ -8,6 +8,7 @@ import {
   Animated,
   Image,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { colors, fontSize, dietIcons, gradients } from "@/constants/tokens";
 import { Ionicons } from "@expo/vector-icons";
@@ -400,7 +401,7 @@ const AddPartnerScreen = () => {
         )}
 
         {step === 4 && (
-          <View>
+          <ScrollView>
             <Text style={styles.questionText}>
               What does {selectedGender === "Female" ? "she" : "he"} love?
             </Text>
@@ -436,10 +437,10 @@ const AddPartnerScreen = () => {
               <Text style={styles.errorText}>{lovesError}</Text>
             )}
             <Text style={styles.helperText}>
-              *Answer as broad as you can, following the example shown below.*
+              *Answer as broad as you can, following the example below.*
             </Text>
             <Text style={styles.exampleText}>
-              Example: Sunsets, concerts, Thai food, art, John Wick, horses.
+              Example: Sunset, Thai Food, Art, Stranger Things.
             </Text>
 
             <View style={styles.suggestedContainer}>
@@ -453,7 +454,7 @@ const AddPartnerScreen = () => {
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </ScrollView>
         )}
 
         {step === 5 && (
