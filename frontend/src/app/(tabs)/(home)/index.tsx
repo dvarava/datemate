@@ -200,6 +200,7 @@ const HomeScreen = () => {
     return daysLeft === 0 ? "is" : "until";
   };
 
+
   useEffect(() => {
     const resetReminder = async () => {
       if (isNotified && notificationId) {
@@ -214,6 +215,7 @@ const HomeScreen = () => {
     };
 
     resetReminder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nearestUpcomingDate.name, nearestUpcomingDate.daysLeft]);
 
   return (
