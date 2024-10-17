@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -31,8 +31,16 @@ const isSmallScreen = width < 380;
 const calculateDaysUntilDate = (targetDate: Date): number => {
   const today = new Date();
 
-  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+  const todayMidnight = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  const targetMidnight = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth(),
+    targetDate.getDate()
+  );
 
   const diffTime = targetMidnight.getTime() - todayMidnight.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -192,6 +200,22 @@ const HomeScreen = () => {
     return daysLeft === 0 ? "is" : "until";
   };
 
+  useEffect(() => {
+    const resetReminder = async () => {
+      if (isNotified && notificationId) {
+        try {
+          await Notifications.cancelScheduledNotificationAsync(notificationId);
+          setIsNotified(false);
+          setNotificationId(null);
+        } catch (error) {
+          console.error("Error cancelling notification:", error);
+        }
+      }
+    };
+
+    resetReminder();
+  }, [nearestUpcomingDate.name, nearestUpcomingDate.daysLeft]);
+
   return (
     <ScrollView style={styles.container}>
       {/* Calendar Component */}
@@ -336,6 +360,8 @@ const HomeScreen = () => {
     </ScrollView>
   );
 };
+
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -529,6 +555,12 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Regular",
     paddingHorizontal: 20,
   },
+  todayDateContainer: {
+    backgroundColor: colors.selected,
+  },
+  todayDateText: {
+    color: colors.primary,
+    fontFamily: "Nunito-Bold",
+  },
 });
 
-export default HomeScreen;
