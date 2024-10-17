@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,21 +6,31 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
-  SafeAreaView,
+  Animated,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { colors, fontSize } from "@/constants/tokens";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import GradientBorder from "@/components/GradientBorder";
 import Heart from "@/svg/heart";
 
-const { height, width } = Dimensions.get("window");
-const isSmallScreen = width < 380;
+const { height } = Dimensions.get("window");
 
 const UnsubscribeScreen: React.FC = () => {
   const [inputText, setInputText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleUnsubscribe = () => {
     setIsModalVisible(true);
@@ -35,13 +45,13 @@ const UnsubscribeScreen: React.FC = () => {
       <Text style={styles.labelText}>Leave your input</Text>
 
       <TextInput
+        ref={inputRef}
         style={styles.input}
         placeholder="Let us know why you're leaving to help us improve!"
         placeholderTextColor="#999"
         value={inputText}
         onChangeText={setInputText}
         multiline
-        autoFocus={true}
       />
 
       <TouchableOpacity
@@ -83,10 +93,8 @@ const UnsubscribeScreen: React.FC = () => {
             <Text style={styles.modalHeader}>One Time Offer</Text>
             <Text style={styles.modalSubHeader}>Too expensive? We get it.</Text>
 
-            {/* Center the offer card */}
             <View style={styles.modalContent}>
               <View style={styles.modalOfferContainer}>
-                {/* Positioned Heart and Icon */}
                 <View style={styles.modalIconWrapper}>
                   <Heart size={80} />
                   <Ionicons
@@ -101,7 +109,7 @@ const UnsubscribeScreen: React.FC = () => {
                   We'd love you to stay!
                 </Text>
                 <Text style={styles.modalOfferText}>
-                  Here’s a <Text style={styles.discountText}>80% OFF</Text>{" "}
+                  Here’s a {" "}<Text style={styles.discountText}>80% OFF</Text>{" "}
                   discount!
                 </Text>
 
@@ -207,28 +215,28 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     borderColor: "transparent",
-    overflow: "visible", // Ensure overflow is visible
+    overflow: "visible",
   },
   modalOfferContainer: {
-    marginTop: isSmallScreen ? 75 : 0,
+    marginTop: 75,
     padding: 30,
     alignItems: "center",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     marginBottom: 30,
-    overflow: "visible", // Ensure overflow is visible
+    overflow: "visible",
     borderColor: colors.secondary,
     borderWidth: 3,
     borderRadius: 30,
   },
   modalIconWrapper: {
     position: "absolute",
-    top: -50, // Move the heart icon above the card
+    top: -50,
     zIndex: 1,
     justifyContent: "center",
     alignItems: "center",
-    overflow: "visible", // Ensure overflow is visible for this icon
+    overflow: "visible",
   },
   modalHeader: {
     fontSize: 28,
