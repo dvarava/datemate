@@ -51,6 +51,8 @@ const styles = StyleSheet.create({
   closeButton: {
     position: "absolute",
     right: 25,
+    padding: 15,
+    paddingRight: 0,
   } as ViewStyle,
   appName: {
     color: colors.primary,

@@ -60,10 +60,14 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     left: 25,
+    padding: 15,
+    paddingLeft: 0,
   } as ViewStyle,
   homeButton: {
     position: "absolute",
     right: 25,
+    padding: 15,
+    paddingRight: 0,
   } as ViewStyle,
   appName: {
     color: colors.primary,

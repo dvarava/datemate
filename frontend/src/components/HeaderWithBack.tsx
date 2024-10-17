@@ -52,6 +52,8 @@ const styles = StyleSheet.create({
   backButton: {
     position: "absolute",
     left: 25,
+    padding: 15,
+    paddingLeft: 0,
   } as ViewStyle,
   settingsButton: {
     position: "absolute",
