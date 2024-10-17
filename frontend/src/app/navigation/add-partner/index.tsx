@@ -224,7 +224,7 @@ const AddPartnerScreen = () => {
         gender: selectedGender as 'Male' | 'Female',
         personalityType: selectedPersonality as 'Introvert' | 'Extrovert',
         interests: partnerLoves,
-        dietaryPreferences: selectedDiet.length > 0 ? selectedDiet.join(', ') : null,
+        dietaryPreferences: selectedDiet,
         avatarGradient: partnerGradient,
       };
   
