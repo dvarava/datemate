@@ -9,15 +9,18 @@ import {
   Animated,
   Dimensions,
   Keyboard,
+  Alert,
 } from "react-native";
 import { colors, fontSize } from "@/constants/tokens";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import Heart from "@/svg/heart";
+import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get("window");
 
 const UnsubscribeScreen: React.FC = () => {
+  const router = useRouter();
   const [inputText, setInputText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -36,8 +39,33 @@ const UnsubscribeScreen: React.FC = () => {
     setIsModalVisible(true);
   };
 
+  const handleClaimOffer = () => {
+    // Write in-app purrchase login here
+    console.log("Offer Claimed!");
+  };
   const handleCloseModal = () => {
-    setIsModalVisible(false);
+    Alert.alert(
+      "Are you sure you want to unsubscribe?",
+      "",
+      [
+        {
+          text: "Cancel Subscription",
+          onPress: () => {
+            setIsModalVisible(false);
+            router.push("/(tabs)/(home)");
+          },
+          style: "destructive",
+        },
+        {
+          text: "Keep Subscription",
+          onPress: () => {
+            Keyboard.dismiss();
+          },
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -109,7 +137,7 @@ const UnsubscribeScreen: React.FC = () => {
                   We'd love you to stay!
                 </Text>
                 <Text style={styles.modalOfferText}>
-                  Here’s a {" "}<Text style={styles.discountText}>80% OFF</Text>{" "}
+                  Here’s a <Text style={styles.discountText}>80% OFF</Text>{" "}
                   discount!
                 </Text>
 
@@ -124,7 +152,7 @@ const UnsubscribeScreen: React.FC = () => {
             {/* Bottom button */}
             <View style={styles.buttonWrapper}>
               <TouchableOpacity
-                onPress={handleCloseModal}
+                onPress={handleClaimOffer}
                 style={styles.modalCloseButton}
               >
                 <LinearGradient
