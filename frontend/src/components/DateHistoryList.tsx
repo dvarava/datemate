@@ -1,7 +1,8 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import DateHistoryCard from "./DateHistoryCard";
 import { DateHistory } from "@/types/dateHistory";
+import { colors, fontSize } from "@/constants/tokens";
 
 interface DateHistoryListProps {
   histories: DateHistory[];
@@ -21,23 +22,36 @@ const DateHistoryList: React.FC<DateHistoryListProps> = ({
 
   return (
     <View style={styles.historyList}>
-      {histories.map((history) => (
-        <DateHistoryCard
-          key={history.id}
-          history={history}
-          onActionPress={onActionPress}
-          isPremium={isPremium}
-          showAvatar={showAvatar}
-          showFavorite={showFavorite}
-        />
-      ))}
+      {histories.length === 0 ? (
+        <Text style={styles.noHistoryText}>
+          No dates yet.{"\n"}Tap the heart to add one!
+        </Text>
+      ) : (
+        histories.map((history) => (
+          <DateHistoryCard
+            key={history.id}
+            history={history}
+            onActionPress={onActionPress}
+            isPremium={isPremium}
+            showAvatar={showAvatar}
+            showFavorite={showFavorite}
+          />
+        ))
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   historyList: {
-    paddingBottom: 20,
+    paddingTop: 20,
+  },
+  noHistoryText: {
+    paddingTop: 0,
+    color: colors.primary,
+    fontSize: fontSize.md,
+    fontFamily: "Nunito-Regular",
+    textAlign: "center",
   },
 });
 

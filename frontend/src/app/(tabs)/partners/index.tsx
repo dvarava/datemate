@@ -67,7 +67,7 @@ const PartnersScreen: React.FC = () => {
       </TouchableOpacity>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={colors.secondary} />
       ) : (
         <PartnersList
           profiles={partnerProfiles}
