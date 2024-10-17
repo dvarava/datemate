@@ -7,12 +7,16 @@ import {
   TextInput,
   Modal,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { colors, fontSize } from "@/constants/tokens";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import GradientBorder from "@/components/GradientBorder";
 import Heart from "@/svg/heart";
+
+const { height, width } = Dimensions.get("window");
+const isSmallScreen = width < 380;
 
 const UnsubscribeScreen: React.FC = () => {
   const [inputText, setInputText] = useState("");
@@ -32,11 +36,12 @@ const UnsubscribeScreen: React.FC = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Please let us know why you are leaving to help us improve the app for others :)"
+        placeholder="Let us know why you're leaving to help us improve!"
         placeholderTextColor="#999"
         value={inputText}
         onChangeText={setInputText}
         multiline
+        autoFocus={true}
       />
 
       <TouchableOpacity
@@ -85,9 +90,9 @@ const UnsubscribeScreen: React.FC = () => {
                 <View style={styles.modalIconWrapper}>
                   <Heart size={80} />
                   <Ionicons
-                    name="gift"
+                    name="gift-outline"
                     size={30}
-                    color="#fff"
+                    color={colors.primary}
                     style={styles.giftIconPosition}
                   />
                 </View>
@@ -205,6 +210,7 @@ const styles = StyleSheet.create({
     overflow: "visible", // Ensure overflow is visible
   },
   modalOfferContainer: {
+    marginTop: isSmallScreen ? 75 : 0,
     padding: 30,
     alignItems: "center",
     shadowOffset: { width: 0, height: 4 },
@@ -277,7 +283,7 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Black",
   },
   smallText: {
-    color: "#aaa",
+    color: colors.primary,
     fontSize: fontSize.sm,
     fontFamily: "Nunito-Regular",
   },

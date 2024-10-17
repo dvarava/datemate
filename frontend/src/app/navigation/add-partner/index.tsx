@@ -1,683 +1,333 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
   TextInput,
+  Modal,
   Animated,
-  Image,
   Keyboard,
-  ScrollView,
+  Dimensions,
 } from "react-native";
-import { colors, fontSize, dietIcons, gradients } from "@/constants/tokens";
-import { Ionicons } from "@expo/vector-icons";
+import { colors, fontSize } from "@/constants/tokens";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation, useRouter } from "expo-router";
-import MaskedView from "@react-native-masked-view/masked-view";
-import { usePartnerStore } from "@/store/partner.store";
-import { Alert } from "react-native";
-import { PartnerInput } from "@/store/types/partner";
+import { Ionicons } from "@expo/vector-icons";
+import GradientBorder from "@/components/GradientBorder";
+import Heart from "@/svg/heart";
 
-const getRandomGradient = () => {
-  const randomIndex = Math.floor(Math.random() * gradients.length);
-  return gradients[randomIndex];
-};
+const { height } = Dimensions.get("window");
 
-const AddPartnerScreen = () => {
-  const [selectedGender, setSelectedGender] = useState("");
-  const [selectedPersonality, setSelectedPersonality] = useState("");
-  const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
-  const [step, setStep] = useState(0);
-  const [partnerName, setPartnerName] = useState("");
-  const [partnerLoves, setPartnerLoves] = useState<string[]>([]);
+const UnsubscribeScreen: React.FC = () => {
   const [inputText, setInputText] = useState("");
-  const [partnerAge, setPartnerAge] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const [ageError, setAgeError] = useState("");
-  const [isAgeValid, setIsAgeValid] = useState(true);
-  const [nameError, setNameError] = useState("");
-  const [isNameValid, setIsNameValid] = useState(true);
-
-  const [isLovesValid, setIsLovesValid] = useState(true);
-  const [lovesError, setLovesError] = useState("");
-
-  const [partnerGradient, setPartnerGradient] =
-    useState<string[]>(getRandomGradient);
-
-  const morphScale = useRef(new Animated.Value(0.8)).current;
-  const morphOpacity = useRef(new Animated.Value(0)).current;
-
-  const { addPartner } = usePartnerStore();
-  const router = useRouter();
-
-  const suggestedInterests = [
-    "Music",
-    "Movies",
-    "Sports",
-    "Sushi",
-    "Nature",
-    "Dancing",
-    "Cooking",
-  ];
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    morphIn();
-  }, [step]);
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
+      Animated.timing(keyboardHeight, {
+        toValue: event.endCoordinates.height,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
 
-  const morphIn = () => {
-    morphScale.setValue(0.8);
-    morphOpacity.setValue(0);
-    Animated.parallel([
-      Animated.spring(morphScale, {
-        toValue: 1,
-        useNativeDriver: true,
-        friction: 5,
-      }),
-      Animated.timing(morphOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const morphOut = (nextStep: number) => {
-    Animated.parallel([
-      Animated.timing(morphScale, {
-        toValue: 0.8,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(morphOpacity, {
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      Animated.timing(keyboardHeight, {
         toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setStep(nextStep);
-      morphIn();
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
     });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const handleUnsubscribe = () => {
+    setIsModalVisible(true);
   };
 
-  const handleGenderSelect = (gender: string) => {
-    setSelectedGender(gender);
-    morphOut(1);
-  };
-
-  const handleNameSubmit = () => {
-    const nameRegex = /^[A-Za-z\s]+$/;
-    const nameLength = partnerName.trim().length;
-
-    if (!nameRegex.test(partnerName)) {
-      setIsNameValid(false);
-      setNameError("Name can only contain English letters and spaces.");
-      return;
-    }
-
-    if (nameLength < 2 || nameLength > 10) {
-      setIsNameValid(false);
-      setNameError("Name must be between 2 and 10 letters.");
-      return;
-    }
-
-    setIsNameValid(true);
-    setNameError("");
-    morphOut(2);
-  };
-
-  const handleAgeSubmit = () => {
-    const numberRegex = /^[0-9]+$/;
-    const ageRangeRegex = /^(1[0-9]|[2-9][0-9]|100)$/;
-
-    if (!numberRegex.test(partnerAge)) {
-      setIsAgeValid(false);
-      setAgeError("Only numbers are allowed.");
-      return;
-    }
-
-    if (!ageRangeRegex.test(partnerAge)) {
-      setIsAgeValid(false);
-      setAgeError("Age must be between 10 and 100.");
-      return;
-    }
-
-    setIsAgeValid(true);
-    setAgeError("");
-    morphOut(3);
-  };
-
-  const handlePersonalitySelect = (personality: string) => {
-    setSelectedPersonality(personality);
-    morphOut(4);
-  };
-
-  const handleDietSelect = (diet: string) => {
-    setSelectedDiet((prevSelectedDiet) => {
-      if (prevSelectedDiet.includes(diet)) {
-        return prevSelectedDiet.filter((item) => item !== diet);
-      } else {
-        return [...prevSelectedDiet, diet];
-      }
-    });
-  };
-
-  const handleInputChange = (text: string) => {
-    if (text.includes(",")) {
-      const interests = text.split(",");
-      interests.forEach((interest) => {
-        const trimmedInterest = interest.trim();
-        if (trimmedInterest.length > 0) {
-          if (/^[A-Za-z\s]+$/.test(trimmedInterest)) {
-            setPartnerLoves((prev) => [...prev, trimmedInterest]);
-          } else {
-            setIsLovesValid(false);
-            setLovesError("Interests can only contain letters and spaces.");
-          }
-        }
-      });
-      setInputText("");
-    } else {
-      setInputText(text);
-    }
-  };
-
-  const handleSuggestedInterestClick = (interest: string) => {
-    if (!partnerLoves.includes(interest)) {
-      setPartnerLoves((prev) => [...prev, interest]);
-    }
-  };
-
-  const removeInterest = (index: number) => {
-    setPartnerLoves(partnerLoves.filter((_, i) => i !== index));
-  };
-
-  const handleLovesSubmit = () => {
-    if (inputText.trim().length > 0) {
-      if (/^[A-Za-z\s]+$/.test(inputText.trim())) {
-        setPartnerLoves([...partnerLoves, inputText.trim()]);
-      } else {
-        setIsLovesValid(false);
-        setLovesError("Interests can only contain letters and spaces.");
-        return;
-      }
-      setInputText("");
-    }
-
-    if (partnerLoves.length < 3) {
-      setIsLovesValid(false);
-      setLovesError("Please enter at least 3 interests.");
-      return;
-    }
-
-    setIsLovesValid(true);
-    setLovesError("");
-    Keyboard.dismiss();
-    morphOut(5);
-  };
-
-  const handleFinish = async () => {
-    try {
-      const partnerData: PartnerInput = {
-        name: partnerName,
-        age: parseInt(partnerAge, 10),
-        gender: selectedGender as "Male" | "Female",
-        personalityType: selectedPersonality as "Introvert" | "Extrovert",
-        interests: partnerLoves,
-        dietaryPreferences: selectedDiet,
-        avatarGradient: partnerGradient,
-      };
-
-      await addPartner(partnerData);
-      router.replace("/partners");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 0) {
-      morphOut(step - 1);
-    }
-  };
-
-  const validIcons = [
-    "heart",
-    "man",
-    "woman",
-    "people",
-    "leaf",
-    "arrow-back",
-  ] as const;
-  type IconName = (typeof validIcons)[number];
-
-  const GradientIcon: React.FC<{
-    name: IconName;
-    size: number;
-    color: string;
-  }> = ({ name, size, color }) => {
-    return (
-      <MaskedView
-        maskElement={<Ionicons name={name} size={size} color={color} />}
-      >
-        <LinearGradient
-          colors={[color, colors.primary]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ width: size, height: size }}
-        />
-      </MaskedView>
-    );
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
   };
 
   return (
-    <View style={styles.container}>
-      {step > 0 && (
-        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color={colors.primary} />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-      )}
+    <Animated.View style={[styles.container, { paddingBottom: keyboardHeight }]}>
+      <Text style={styles.labelText}>Leave your input</Text>
 
-      <Animated.View
+      <TextInput
+        style={styles.input}
+        placeholder="Let us know why you're leaving to help us improve!"
+        placeholderTextColor="#999"
+        value={inputText}
+        onChangeText={setInputText}
+        multiline
+      />
+
+      <TouchableOpacity
+        onPress={handleUnsubscribe}
         style={[
-          styles.stepContainer,
-          {
-            transform: [{ scale: morphScale }],
-            opacity: morphOpacity,
-          },
+          styles.unsubscribeButton,
+          inputText ? {} : styles.disabledButton,
         ]}
+        disabled={!inputText}
       >
-        {step === 0 && (
-          <>
-            <Text style={styles.questionText}>Who is your partner?</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  selectedGender === "Female" && styles.selectedButton,
-                ]}
-                onPress={() => handleGenderSelect("Female")}
-              >
-                <GradientIcon name="heart" size={50} color="#ff6dcd" />
-                <Text style={styles.genderText}>Female</Text>
-              </TouchableOpacity>
+        <LinearGradient
+          colors={
+            inputText ? [colors.secondary, colors.primary] : ["#ccc", "#999"]
+          }
+          start={{ x: 0.6, y: 0 }}
+          end={{ x: 1.4, y: 1 }}
+          style={styles.buttonGradient}
+        >
+          <Text style={styles.buttonText}>Confirm and Unsubscribe</Text>
+        </LinearGradient>
+      </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  selectedGender === "Male" && styles.selectedButton,
-                ]}
-                onPress={() => handleGenderSelect("Male")}
-              >
-                <GradientIcon name="heart" size={50} color="#4da9ff" />
-                <Text style={styles.genderText}>Male</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-
-        {step === 1 && (
-          <View>
-            <Text style={styles.questionText}>
-              What is {selectedGender === "Female" ? "her" : "his"} name?
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                !isNameValid && { borderBottomColor: colors.secondary },
-              ]}
-              placeholder={`Enter ${selectedGender === "Female" ? "her" : "his"} name`}
-              value={partnerName}
-              onChangeText={setPartnerName}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleNameSubmit}
-            />
-            {!isNameValid && <Text style={styles.errorText}>{nameError}</Text>}
-          </View>
-        )}
-
-        {step === 2 && (
-          <View>
-            <Text style={styles.questionText}>
-              What's {selectedGender === "Female" ? "her" : "his"} age?
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                !isAgeValid && { borderBottomColor: colors.secondary },
-              ]}
-              placeholder={`Enter ${selectedGender === "Female" ? "her" : "his"} age`}
-              value={partnerAge}
-              onChangeText={setPartnerAge}
-              autoFocus
-              keyboardType="numeric"
-              returnKeyType="done"
-              onSubmitEditing={handleAgeSubmit}
-            />
-            {!isAgeValid && <Text style={styles.errorText}>{ageError}</Text>}
-          </View>
-        )}
-
-        {step === 3 && (
-          <>
-            <Text style={styles.questionText}>
-              What's {selectedGender === "Female" ? "her" : "his"} personality
-              type?
-            </Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  selectedPersonality === "Introvert" && styles.selectedButton,
-                ]}
-                onPress={() => handlePersonalitySelect("Introvert")}
-              >
-                <GradientIcon
-                  name={selectedGender === "Female" ? "woman" : "man"}
-                  size={50}
-                  color={colors.secondary}
-                />
-                <Text style={styles.genderText}>Introvert</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.genderButton,
-                  selectedPersonality === "Extrovert" && styles.selectedButton,
-                ]}
-                onPress={() => handlePersonalitySelect("Extrovert")}
-              >
-                <GradientIcon
-                  name="people"
-                  size={50}
-                  color={colors.secondary}
-                />
-                <Text style={styles.genderText}>Extrovert</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-
-        {step === 4 && (
-          <ScrollView>
-            <Text style={styles.questionText}>
-              What does {selectedGender === "Female" ? "she" : "he"} love?
-            </Text>
-            <View
-              style={[
-                styles.inputContainer,
-                !isLovesValid && { borderColor: colors.secondary },
-              ]}
+      {/* Modal for the One Time Offer */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCloseModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.fullScreenModal}>
+            <TouchableOpacity
+              onPress={handleCloseModal}
+              style={styles.closeButton}
             >
-              <View style={styles.chipsContainer}>
-                {partnerLoves.map((interest, index) => (
-                  <View key={index} style={styles.chip}>
-                    <Text style={styles.chipText}>{interest}</Text>
-                    <TouchableOpacity onPress={() => removeInterest(index)}>
-                      <Ionicons name="close" size={16} color={colors.primary} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                <TextInput
-                  style={styles.textInput}
-                  placeholder={
-                    partnerLoves.length === 0 ? "Separate by comma" : ""
-                  }
-                  value={inputText}
-                  onChangeText={handleInputChange}
-                  autoFocus
-                  returnKeyType="done"
-                  onSubmitEditing={handleLovesSubmit}
-                />
+              <Ionicons name="close" size={28} color={colors.primary} />
+            </TouchableOpacity>
+
+            <Text style={styles.modalHeader}>One Time Offer</Text>
+            <Text style={styles.modalSubHeader}>Too expensive? We get it.</Text>
+
+            <View style={styles.modalContent}>
+              <View style={styles.modalOfferContainer}>
+                <View style={styles.modalIconWrapper}>
+                  <Heart size={80} />
+                  <Ionicons
+                    name="gift-outline"
+                    size={30}
+                    color={colors.primary}
+                    style={styles.giftIconPosition}
+                  />
+                </View>
+
+                <Text style={styles.modalOfferText}>
+                  We'd love you to stay!
+                </Text>
+                <Text style={styles.modalOfferText}>
+                  Here’s a {" "}<Text style={styles.discountText}>80% OFF</Text>{" "}
+                  discount!
+                </Text>
+
+                <TouchableOpacity style={styles.priceButton}>
+                  <Text style={styles.priceButtonText}>Only $1.69 / month</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.smallText}>Lowest price ever</Text>
               </View>
             </View>
-            {!isLovesValid && (
-              <Text style={styles.errorText}>{lovesError}</Text>
-            )}
-            <Text style={styles.helperText}>
-              *Answer as broad as you can, following the example below.*
-            </Text>
-            <Text style={styles.exampleText}>
-              Example: Sunset, Thai Food, Art, Stranger Things.
-            </Text>
 
-            <View style={styles.suggestedContainer}>
-              {suggestedInterests.map((interest, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.suggestedChip}
-                  onPress={() => handleSuggestedInterestClick(interest)}
-                >
-                  <Text style={styles.suggestedChipText}>{interest}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-        )}
-
-        {step === 5 && (
-          <>
-            <Text style={styles.questionText}>
-              What is {selectedGender === "Female" ? "her" : "his"} dietary
-              preference?
-            </Text>
-            <View style={styles.dietButtonContainer}>
-              {Object.keys(dietIcons).map((diet) => (
-                <TouchableOpacity
-                  key={diet}
-                  style={[
-                    styles.dietButton,
-                    selectedDiet.includes(diet) && styles.selectedButton,
-                  ]}
-                  onPress={() => handleDietSelect(diet)}
-                >
-                  <Image
-                    source={dietIcons[diet as keyof typeof dietIcons]}
-                    style={styles.dietIcon}
-                  />
-                  <Text style={styles.dietText}>{diet}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={styles.finishButton}
-              onPress={handleFinish}
-            >
-              <LinearGradient
-                colors={[colors.secondary, colors.primary]}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 1, y: 1.5 }}
-                style={styles.generateButtonGradient}
+            {/* Bottom button */}
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity
+                onPress={handleCloseModal}
+                style={styles.modalCloseButton}
               >
-                <Text style={styles.finishText}>
-                  {selectedDiet.length > 0 ? "Finish" : "Skip & Finish"}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </>
-        )}
-      </Animated.View>
-    </View>
+                <LinearGradient
+                  colors={
+                    inputText
+                      ? [colors.secondary, colors.primary]
+                      : ["#ccc", "#999"]
+                  }
+                  start={{ x: 0.6, y: 0 }}
+                  end={{ x: 1.4, y: 1 }}
+                  style={styles.buttonGradient}
+                >
+                  <Text style={styles.claimButtonText}>
+                    Claim your limited offer now!
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 25,
     backgroundColor: colors.background,
-    padding: 20,
+    paddingTop: 30,
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  backText: {
+  labelText: {
+    fontSize: fontSize.lg,
+    fontFamily: "Nunito-Black",
     color: colors.primary,
-    fontSize: fontSize.md,
-    fontFamily: "Nunito-Regular",
-    marginLeft: 5,
-  },
-  stepContainer: {
-    flex: 1,
-  },
-  questionText: {
-    fontSize: 25,
-    color: colors.primary,
-    fontFamily: "Nunito-Bold",
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    width: "85%",
-    gap: 20,
-  },
-  genderButton: {
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 10,
-    flex: 1,
-    backgroundColor: colors.secondaryBackground,
-  },
-  selectedButton: {
-    backgroundColor: "#333",
-  },
-  genderText: {
-    fontSize: fontSize.md,
-    fontFamily: "Nunito-Regular",
-    color: colors.primary,
+    marginBottom: 10,
   },
   input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#999",
-    width: "80%",
-    padding: 10,
+    backgroundColor: "#f0f0f0",
+    color: colors.background,
     fontSize: fontSize.md,
     fontFamily: "Nunito-Regular",
-    color: colors.primary,
-  },
-  errorText: {
-    color: colors.secondary,
-    fontSize: fontSize.xs,
-    marginTop: 5,
-  },
-  helperText: {
-    marginTop: 10,
-    fontSize: fontSize.xs,
-    fontFamily: "Nunito-Regular",
-    color: colors.primary,
-  },
-  exampleText: {
-    fontSize: fontSize.sm,
-    fontFamily: "Nunito-Italic",
-    color: "#777",
-    marginTop: 5,
-  },
-  dietButtonContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 10,
-  },
-  dietButton: {
-    alignItems: "center",
-    padding: 10,
-    margin: 5,
-    backgroundColor: colors.secondaryBackground,
-    borderRadius: 10,
-    width: "28%",
-  },
-  dietIcon: {
-    width: 40,
-    height: 40,
-    margin: 5,
-  },
-  dietText: {
-    fontSize: 14,
-    fontFamily: "Nunito-Regular",
-    color: colors.primary,
-    textAlign: "center",
-  },
-  finishButton: {
-    marginTop: 20,
     padding: 15,
     borderRadius: 10,
-    alignItems: "center",
-    alignSelf: "center",
+    minHeight: 120,
+    textAlignVertical: "top",
+    marginBottom: 30,
   },
-  generateButtonGradient: {
+  unsubscribeButton: {
+    marginTop: 20,
+    borderRadius: 25,
+    overflow: "hidden",
+  },
+  buttonGradient: {
     paddingVertical: 15,
-    borderRadius: 30,
-    justifyContent: "center",
     alignItems: "center",
-    width: 150,
+    borderRadius: 25,
   },
-  finishText: {
-    color: colors.primary,
-    fontSize: fontSize.md,
+  buttonText: {
+    fontSize: fontSize.base,
+    color: "#fff",
     fontFamily: "Nunito-Black",
   },
-  inputContainer: {
-    borderWidth: 1,
-    borderColor: "#999",
-    width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    fontSize: fontSize.md,
-    fontFamily: "Nunito-Regular",
-    color: colors.primary,
+  disabledButton: {
+    opacity: 0.6,
   },
-  chipsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#222",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginRight: 5,
-    marginVertical: 5,
-  },
-  chipText: {
-    color: colors.primary,
-    fontSize: fontSize.sm,
-    fontFamily: "Nunito-Regular",
-    marginRight: 5,
-  },
-  textInput: {
+  modalContainer: {
     flex: 1,
-    fontSize: fontSize.md,
-    fontFamily: "Nunito-Regular",
-    color: colors.primary,
-    minWidth: 100,
-  },
-  suggestedContainer: {
-    marginTop: 15,
-    flexDirection: "row",
-    flexWrap: "wrap",
     justifyContent: "center",
-    gap: 5,
+    alignItems: "center",
+    backgroundColor: colors.background,
+    paddingVertical: 50,
   },
-  suggestedChip: {
-    backgroundColor: colors.selected,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  fullScreenModal: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: colors.background,
+    justifyContent: "space-around",
+    paddingTop: 50,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 30,
+    right: 30,
+  },
+  modalContentWrapper: {
     borderRadius: 20,
-    marginRight: 5,
-    marginVertical: 5,
+    paddingVertical: 10,
+    borderColor: "transparent",
+    overflow: "visible",
   },
-  suggestedChipText: {
+  modalOfferContainer: {
+    marginTop: 75,
+    padding: 30,
+    alignItems: "center",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    marginBottom: 30,
+    overflow: "visible",
+    borderColor: colors.secondary,
+    borderWidth: 3,
+    borderRadius: 30,
+  },
+  modalIconWrapper: {
+    position: "absolute",
+    top: -50,
+    zIndex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "visible",
+  },
+  modalHeader: {
+    fontSize: 28,
+    fontFamily: "Nunito-Black",
+    color: colors.primary,
+    marginBottom: 5,
+    textAlign: "center",
+  },
+  modalSubHeader: {
+    fontSize: fontSize.base,
+    fontFamily: "Nunito-Bold",
+    color: "#aaa",
+    textAlign: "center",
+  },
+  modalContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  giftIconPosition: {
+    position: "absolute",
+    top: 25,
+    left: 25,
+  },
+  modalOfferText: {
+    fontSize: fontSize.md,
+    fontFamily: "Nunito-Bold",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  discountText: {
+    color: colors.secondary,
+    fontSize: fontSize.lg,
+  },
+  priceButton: {
+    marginVertical: 20,
+    borderRadius: 25,
+    overflow: "hidden",
+    backgroundColor: colors.secondary,
+    padding: 20,
+  },
+  priceButtonGradient: {
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    alignItems: "center",
+  },
+  priceButtonText: {
+    color: "#fff",
+    fontSize: fontSize.base,
+    fontFamily: "Nunito-Black",
+  },
+  smallText: {
     color: colors.primary,
     fontSize: fontSize.sm,
     fontFamily: "Nunito-Regular",
+  },
+  modalCloseButton: {
+    width: "100%",
+    borderRadius: 25,
+    overflow: "hidden",
+  },
+  claimButtonGradient: {
+    paddingVertical: 15,
+    alignItems: "center",
+    borderRadius: 25,
+  },
+  claimButtonText: {
+    fontSize: fontSize.base,
+    color: "#fff",
+    fontFamily: "Nunito-Black",
+  },
+  buttonWrapper: {
+    paddingHorizontal: 30,
+    paddingVertical: 20,
   },
 });
 
-export default AddPartnerScreen;
+export default UnsubscribeScreen;
