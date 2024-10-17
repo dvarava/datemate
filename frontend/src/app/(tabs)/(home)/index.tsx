@@ -271,8 +271,8 @@ const HomeScreen = () => {
               <Text style={[styles.cardTitle, styles.darkText]}>PREMIUM</Text>
               <Text style={[styles.offerText, styles.darkText]}>50% OFF</Text>
               <View style={styles.priceContainer}>
-                <Text style={[styles.darkText, styles.oldPrice]}>$9.99</Text>
-                <Text style={[styles.darkText, styles.newPrice]}>$4.99</Text>
+                <Text style={[styles.darkText, styles.oldPrice]}>$7.99</Text>
+                <Text style={[styles.darkText, styles.newPrice]}>$3.75</Text>
               </View>
               <TouchableOpacity
                 style={styles.buyNowButton}
