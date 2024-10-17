@@ -60,7 +60,7 @@ const PartnersScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Your partner's profiles</Text>
+      <Text style={styles.header}>Your Partner's Profiles</Text>
 
       <TouchableOpacity style={styles.addButton} onPress={handleAddProfile}>
         <Text style={styles.addButtonText}>Click to add partner</Text>
