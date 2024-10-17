@@ -10,6 +10,7 @@ import {
   Linking,
   Image,
   ImageStyle,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -34,6 +35,27 @@ const SettingsScreen = () => {
 
   const handleUnsubscribe = () => {
     router.push("/navigation/unsubscribe");
+  };
+  
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account?",
+      "Are you sure you want to permanently delete your account?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Delete cancelled"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => console.log("Account deleted"),
+          style: "destructive",
+          // Write delete account from DB logic here
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -92,7 +114,11 @@ const SettingsScreen = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
 
-        <TouchableOpacity style={styles.optionButton} activeOpacity={0.6}>
+        <TouchableOpacity
+          style={styles.optionButton}
+          activeOpacity={0.6}
+          onPress={handleDeleteAccount}
+        >
           <Text style={styles.optionText}>Delete Account</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </TouchableOpacity>
