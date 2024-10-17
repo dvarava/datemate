@@ -7,7 +7,7 @@ export type Partner = {
     gender: 'Male' | 'Female';
     personalityType: 'Introvert' | 'Extrovert';
     interests: string[];
-    dietaryPreferences?: string | null;
+    dietaryPreferences: string[] | null;
     avatarGradient?: string[];
 
   };
@@ -18,6 +18,6 @@ export type Partner = {
     gender: 'Male' | 'Female';
     personalityType: 'Introvert' | 'Extrovert';
     interests: string[];
-    dietaryPreferences?: string | null;
+    dietaryPreferences: string[] | null;
     avatarGradient?: string[];
   };

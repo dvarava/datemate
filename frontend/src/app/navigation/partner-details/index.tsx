@@ -57,18 +57,9 @@ const PartnerDetailsScreen: React.FC = () => {
     if (partner) {
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
-      setPartnerPersonality(
-        partner.personalityType as "Introvert" | "Extrovert"
-      );
+      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
       setPartnerLoves(partner.interests);
-
-      if (Array.isArray(partner.dietaryPreferences)) {
-        setSelectedDiet(partner.dietaryPreferences);
-      } else if (typeof partner.dietaryPreferences === "string") {
-        setSelectedDiet(partner.dietaryPreferences.split(","));
-      } else {
-        setSelectedDiet([]);
-      }
+      setSelectedDiet(partner.dietaryPreferences || []);
     }
   }, [partner]);
 
@@ -169,16 +160,16 @@ const PartnerDetailsScreen: React.FC = () => {
       return;
     }
 
-    const updatedPartnerData: Partial<Partner> = {
+      const updatedPartnerData = {
       name: partnerName,
-      age: parseInt(partnerAge),
+      age: parseInt(partnerAge, 10),
       personalityType: partnerPersonality as "Introvert" | "Extrovert",
       interests: partnerLoves,
-      dietaryPreferences: selectedDiet.join(","),
-    };
+      dietaryPreferences: selectedDiet,
+  };
 
     try {
-      await editPartner(partnerId as string, updatedPartnerData);
+      await editPartner(partnerId as string, updatedPartnerData); 
       setIsEditing(false);
     } catch (error) {}
   };
