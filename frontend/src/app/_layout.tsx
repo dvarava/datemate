@@ -30,14 +30,14 @@ const App = () => {
     );
   }
 
-  return isAuthenticated ? (
-    <SafeAreaProvider>
-      <RootNavigation />
-      <StatusBar style="auto" />
-    </SafeAreaProvider>
-  ) : (
-    <AuthScreen />
-  );
+  // return isAuthenticated ? (
+  //   <SafeAreaProvider>
+  //     <RootNavigation />
+  //     <StatusBar style="auto" />
+  //   </SafeAreaProvider>
+  // ) : (
+  //   <AuthScreen />
+  // );
   return  (
     <SafeAreaProvider>
       <RootNavigation />
