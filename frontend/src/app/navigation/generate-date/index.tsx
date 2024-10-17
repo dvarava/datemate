@@ -111,6 +111,11 @@ const GenerateDateScreen = () => {
       return;
     }
 
+    if (selectedLocation === "otherLocation" && !otherLocationAddress) {
+      Alert.alert("Error", "Please select a valid location.");
+      return;
+    }
+
     if (isSubscribed) {
       if (
         !budget ||
@@ -168,9 +173,8 @@ const GenerateDateScreen = () => {
   };
 
   const handleLocationSelect = async (location: string) => {
-    setSelectedLocation(location);
-
     if (location === "myLocation") {
+      setSelectedLocation(location);
       setIsFetchingLocation(true);
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -432,14 +436,18 @@ const GenerateDateScreen = () => {
                   onPress={(data, details = null) => {
                     const selectedAddress = details?.formatted_address ?? null;
                     const coords = details?.geometry?.location;
-                    if (coords) {
+
+                    if (coords && selectedAddress) {
                       setLocationCoords({
                         latitude: coords.lat,
                         longitude: coords.lng,
                       });
+                      setOtherLocationAddress(selectedAddress);
+                      setSelectedLocation("otherLocation");
+                      setSearchLocationModalVisible(false);
+                    } else {
+                      Alert.alert("Error", "Please select a valid location.");
                     }
-                    setOtherLocationAddress(selectedAddress);
-                    setSearchLocationModalVisible(false);
                   }}
                   query={{
                     key: "AIzaSyBbDqckE5OVpDbYXloJOoF8saCf6DqnxRk",
