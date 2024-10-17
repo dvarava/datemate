@@ -105,42 +105,6 @@ const AddPartnerScreen = () => {
     morphOut(1);
   };
 
-  const handleAgeSubmit = () => {
-    const numberRegex = /^[0-9]+$/;
-    const ageRangeRegex = /^(1[0-9]|[2-9][0-9]|100)$/;
-
-    if (!numberRegex.test(partnerAge)) {
-      setIsAgeValid(false);
-      setAgeError("Only numbers are allowed.");
-      return;
-    }
-
-    if (!ageRangeRegex.test(partnerAge)) {
-      setIsAgeValid(false);
-      setAgeError("Age must be between 10 and 100.");
-      return;
-    }
-
-    setIsAgeValid(true);
-    setAgeError("");
-    morphOut(2);
-  };
-
-  const handlePersonalitySelect = (personality: string) => {
-    setSelectedPersonality(personality);
-    morphOut(4);
-  };
-
-  const handleDietSelect = (diet: string) => {
-    setSelectedDiet((prevSelectedDiet) => {
-      if (prevSelectedDiet.includes(diet)) {
-        return prevSelectedDiet.filter((item) => item !== diet);
-      } else {
-        return [...prevSelectedDiet, diet];
-      }
-    });
-  };
-
   const handleNameSubmit = () => {
     const nameRegex = /^[A-Za-z\s]+$/;
     const nameLength = partnerName.trim().length;
@@ -159,7 +123,43 @@ const AddPartnerScreen = () => {
 
     setIsNameValid(true);
     setNameError("");
+    morphOut(2);
+  };
+
+  const handleAgeSubmit = () => {
+    const numberRegex = /^[0-9]+$/;
+    const ageRangeRegex = /^(1[0-9]|[2-9][0-9]|100)$/;
+
+    if (!numberRegex.test(partnerAge)) {
+      setIsAgeValid(false);
+      setAgeError("Only numbers are allowed.");
+      return;
+    }
+
+    if (!ageRangeRegex.test(partnerAge)) {
+      setIsAgeValid(false);
+      setAgeError("Age must be between 10 and 100.");
+      return;
+    }
+
+    setIsAgeValid(true);
+    setAgeError("");
     morphOut(3);
+  };
+
+  const handlePersonalitySelect = (personality: string) => {
+    setSelectedPersonality(personality);
+    morphOut(4);
+  };
+
+  const handleDietSelect = (diet: string) => {
+    setSelectedDiet((prevSelectedDiet) => {
+      if (prevSelectedDiet.includes(diet)) {
+        return prevSelectedDiet.filter((item) => item !== diet);
+      } else {
+        return [...prevSelectedDiet, diet];
+      }
+    });
   };
 
   const handleInputChange = (text: string) => {
@@ -221,15 +221,15 @@ const AddPartnerScreen = () => {
       const partnerData: PartnerInput = {
         name: partnerName,
         age: parseInt(partnerAge, 10),
-        gender: selectedGender as 'Male' | 'Female',
-        personalityType: selectedPersonality as 'Introvert' | 'Extrovert',
+        gender: selectedGender as "Male" | "Female",
+        personalityType: selectedPersonality as "Introvert" | "Extrovert",
         interests: partnerLoves,
         dietaryPreferences: selectedDiet,
         avatarGradient: partnerGradient,
       };
-  
+
       await addPartner(partnerData);
-      router.replace('/partners');
+      router.replace("/partners");
     } catch (error) {
       console.error(error);
     }
@@ -320,6 +320,27 @@ const AddPartnerScreen = () => {
         {step === 1 && (
           <View>
             <Text style={styles.questionText}>
+              What is {selectedGender === "Female" ? "her" : "his"} name?
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                !isNameValid && { borderBottomColor: colors.secondary },
+              ]}
+              placeholder={`Enter ${selectedGender === "Female" ? "her" : "his"} name`}
+              value={partnerName}
+              onChangeText={setPartnerName}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={handleNameSubmit}
+            />
+            {!isNameValid && <Text style={styles.errorText}>{nameError}</Text>}
+          </View>
+        )}
+
+        {step === 2 && (
+          <View>
+            <Text style={styles.questionText}>
               What's {selectedGender === "Female" ? "her" : "his"} age?
             </Text>
             <TextInput
@@ -336,27 +357,6 @@ const AddPartnerScreen = () => {
               onSubmitEditing={handleAgeSubmit}
             />
             {!isAgeValid && <Text style={styles.errorText}>{ageError}</Text>}
-          </View>
-        )}
-
-        {step === 2 && (
-          <View>
-            <Text style={styles.questionText}>
-              What is {selectedGender === "Female" ? "her" : "his"} name?
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                !isNameValid && { borderBottomColor: colors.secondary },
-              ]}
-              placeholder={`Enter ${selectedGender === "Female" ? "her" : "his"} name`}
-              value={partnerName}
-              onChangeText={setPartnerName}
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleNameSubmit}
-            />
-            {!isNameValid && <Text style={styles.errorText}>{nameError}</Text>}
           </View>
         )}
 
