@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   rightCard: {
     alignSelf: "flex-end",
     marginBottom: 40,
-    marginTop: -70,
+    marginTop: -68,
   },
   alignedLeftCard: {
     marginTop: -70,

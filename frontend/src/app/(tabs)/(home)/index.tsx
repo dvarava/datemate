@@ -302,7 +302,7 @@ const HomeScreen = () => {
               <Text style={styles.upcomingText}>
                 {nearestHoliday.daysLeft} Days
               </Text>
-              <Text style={styles.untilText}>until {nearestHoliday.name}!</Text>
+              <Text style={styles.untilText}>until "{nearestHoliday.name}"!</Text>
               <TouchableOpacity
                 style={[
                   styles.notifyButton,

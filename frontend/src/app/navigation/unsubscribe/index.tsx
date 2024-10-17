@@ -59,7 +59,8 @@ const UnsubscribeScreen: React.FC = () => {
         {
           text: "Keep Subscription",
           onPress: () => {
-            Keyboard.dismiss();
+            setIsModalVisible(false);
+            router.push("/(tabs)/(home)");
           },
           style: "cancel",
         },
