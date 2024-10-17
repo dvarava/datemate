@@ -57,12 +57,14 @@ const PartnerDetailsScreen: React.FC = () => {
     if (partner) {
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
-      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
+      setPartnerPersonality(
+        partner.personalityType as "Introvert" | "Extrovert"
+      );
       setPartnerLoves(partner.interests);
 
       if (Array.isArray(partner.dietaryPreferences)) {
         setSelectedDiet(partner.dietaryPreferences);
-      } else if (typeof partner.dietaryPreferences === 'string') {
+      } else if (typeof partner.dietaryPreferences === "string") {
         setSelectedDiet(partner.dietaryPreferences.split(","));
       } else {
         setSelectedDiet([]);
@@ -178,10 +180,8 @@ const PartnerDetailsScreen: React.FC = () => {
     try {
       await editPartner(partnerId as string, updatedPartnerData);
       setIsEditing(false);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
- 
 
   const handleDietSelect = (diet: string) => {
     setSelectedDiet((prev) =>
@@ -296,7 +296,11 @@ const PartnerDetailsScreen: React.FC = () => {
                         !isNameValid && { borderColor: colors.secondary },
                       ]}
                       value={partnerName}
-                      onChangeText={setPartnerName}
+                      onChangeText={(text) => {
+                        if (text.length <= 10) {
+                          setPartnerName(text);
+                        }
+                      }}
                       placeholder="Name"
                       placeholderTextColor={"#D4D4D4"}
                       onEndEditing={handleNameSubmit}
@@ -317,7 +321,11 @@ const PartnerDetailsScreen: React.FC = () => {
                         !isAgeValid && { borderColor: colors.secondary },
                       ]}
                       value={partnerAge}
-                      onChangeText={setPartnerAge}
+                      onChangeText={(text) => {
+                        if (text.length <= 3) {
+                          setPartnerAge(text);
+                        }
+                      }}
                       placeholder="Age"
                       placeholderTextColor={"#D4D4D4"}
                       keyboardType="numeric"
