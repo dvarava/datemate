@@ -47,40 +47,47 @@ const InviteScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("@/assets/logo.png")}
-        style={styles.image}
-        resizeMode="contain"
-      />
-      <Text style={styles.headerText}>
-        Share DateMate AI{"\n"}with your friends!
-      </Text>
-      <LinearGradient
-        colors={[colors.secondary, colors.primary]}
-        start={{ x: 0.6, y: 0 }}
-        end={{ x: 1.4, y: 1 }}
-        style={styles.shareButtonContainer}
-      >
-        <TouchableOpacity
-          style={styles.shareButton}
-          onPress={handleShareInvite}
-        >
-          <Text style={styles.shareButtonText}>SHARE INVITE</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-      <TouchableOpacity
-        style={styles.subTextContainer}
-        onPress={handleCopyLink}
-      >
-        <Ionicons
-          name={linkCopied ? "checkmark-outline" : "copy-outline"}
-          size={18}
-          color={linkCopied ? colors.primary : "#aaa"}
-        />
-        <Text style={styles.subText}>
-          {linkCopied ? "Link copied!" : "Copy the link"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.inviteContent}>
+        <View>
+          <Image
+            source={require("@/assets/logo.png")}
+            style={styles.image}
+            resizeMode="contain"
+          />
+          <Text style={styles.headerText}>
+            Share DateMate AI{"\n"}with your friends!
+          </Text>
+        </View>
+
+        <View>
+          <LinearGradient
+            colors={[colors.secondary, colors.primary]}
+            start={{ x: 0.6, y: 0 }}
+            end={{ x: 1.4, y: 1 }}
+            style={styles.shareButtonContainer}
+          >
+            <TouchableOpacity
+              style={styles.shareButton}
+              onPress={handleShareInvite}
+            >
+              <Text style={styles.shareButtonText}>SHARE INVITE</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+          <TouchableOpacity
+            style={styles.subTextContainer}
+            onPress={handleCopyLink}
+          >
+            <Ionicons
+              name={linkCopied ? "checkmark-outline" : "copy-outline"}
+              size={18}
+              color={linkCopied ? colors.primary : "#aaa"}
+            />
+            <Text style={styles.subText}>
+              {linkCopied ? "Link copied!" : "Copy the link"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -88,10 +95,14 @@ const InviteScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: colors.background,
+  },
+  inviteContent: {
+    flex: 1,
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingBottom: 50,
+    marginVertical: 50,
   },
   image: {
     width: 220,
@@ -111,6 +122,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   } as ViewStyle,
   shareButton: {
+    paddingHorizontal: 50,
     paddingVertical: 15,
     justifyContent: "center",
     alignItems: "center",
@@ -123,6 +135,7 @@ const styles = StyleSheet.create({
   subTextContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginTop: 12,
     gap: 5,
   } as ViewStyle,
