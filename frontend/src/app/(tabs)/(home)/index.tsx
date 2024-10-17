@@ -200,6 +200,47 @@ const HomeScreen = () => {
     return daysLeft === 0 ? "is" : "until";
   };
 
+  const conversationStarters = [
+    "Let's settle this - pineapple on pizza: bold move or total disaster?",
+    "If you could have dinner with any historical figure, who would it be?",
+    "What's the most memorable trip you've ever taken?",
+    "If you could instantly become an expert in something, what would it be?",
+    "What's your favorite way to spend a weekend?",
+    "If you could live in any fictional world, which one would you choose?",
+    "What's a hobby you've always wanted to pick up?",
+    "What's your go-to karaoke song?",
+    "If you could have any superpower, what would it be?",
+    "What's the best piece of advice you've ever received?",
+  ];
+
+  const [currentStarter, setCurrentStarter] = useState<string>("");
+
+  const getTodayConversationStarter = () => {
+    const today = new Date();
+    const dayOfYear = Math.floor(
+      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24
+    );
+    const index = dayOfYear % conversationStarters.length;
+    return conversationStarters[index];
+  };
+
+  useEffect(() => {
+    const updateConversationStarter = () => {
+      const starter = getTodayConversationStarter();
+      setCurrentStarter(starter);
+    };
+
+    updateConversationStarter();
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (now.getHours() === 0 && now.getMinutes() === 0) {
+        updateConversationStarter();
+      }
+    }, 60 * 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const resetReminder = async () => {
@@ -208,6 +249,10 @@ const HomeScreen = () => {
           await Notifications.cancelScheduledNotificationAsync(notificationId);
           setIsNotified(false);
           setNotificationId(null);
+          Alert.alert(
+            "Reminder Reset",
+            `The reminder for "${nearestUpcomingDate.name}" has been canceled because a new event is now upcoming.`
+          );
         } catch (error) {
           console.error("Error cancelling notification:", error);
         }
@@ -215,7 +260,6 @@ const HomeScreen = () => {
     };
 
     resetReminder();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nearestUpcomingDate.name, nearestUpcomingDate.daysLeft]);
 
   return (
@@ -348,7 +392,7 @@ const HomeScreen = () => {
           DAILY CONVERSATION STARTER:
         </Text>
         <Text style={styles.conversationStarterText}>
-          Let's settle this - pineapple on pizza: bold move or total disaster?
+          {currentStarter}
         </Text>
       </View>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -565,4 +609,3 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Bold",
   },
 });
-
