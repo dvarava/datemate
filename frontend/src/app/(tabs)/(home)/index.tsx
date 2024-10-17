@@ -9,6 +9,7 @@ import {
   ViewStyle,
   Alert,
   Button,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors, fontSize } from "@/constants/tokens";
@@ -24,6 +25,9 @@ interface HolidayInfo {
   name: string;
   daysLeft: number;
 }
+
+const { height, width } = Dimensions.get("window");
+const isSmallScreen = width < 380;
 
 const calculateDaysUntilDate = (targetDate: Date): number => {
   const today = new Date();
@@ -216,7 +220,7 @@ const HomeScreen = () => {
   const nearestHoliday = getNearestHoliday();
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Calendar Component */}
       <View style={styles.calendarWrapper}>
         <HomeCalendar specialDates={specialDates} />
@@ -345,7 +349,7 @@ const HomeScreen = () => {
           }}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -386,7 +390,7 @@ const styles = StyleSheet.create({
   },
   cardText: {
     color: colors.primary,
-    fontSize: fontSize.sm,
+    fontSize: isSmallScreen ? 14 : fontSize.sm,
     fontFamily: "Nunito-Regular",
   },
   robotIcon: {
@@ -411,7 +415,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   weatherText: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
   },
   temperatureText: {
     color: colors.primary,
@@ -429,7 +433,7 @@ const styles = StyleSheet.create({
   },
   untilText: {
     color: colors.primary,
-    fontSize: 14,
+    fontSize: isSmallScreen ? 12 : 14,
     fontFamily: "Nunito-Regular",
     marginBottom: 15,
   },
@@ -520,17 +524,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     justifyContent: "center",
     alignItems: "center",
+    paddingBottom: 80,
   },
   conversationStarterTitle: {
     color: colors.primary,
-    fontSize: fontSize.sm,
+    fontSize: isSmallScreen ? 16 : 18,
     marginBottom: 8,
     textAlign: "center",
     fontFamily: "Nunito-Black",
   },
   conversationStarterText: {
     color: colors.primary,
-    fontSize: 18,
+    fontSize: isSmallScreen ? 15 : 16,
     textAlign: "center",
     fontFamily: "Nunito-Regular",
     paddingHorizontal: 20,

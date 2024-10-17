@@ -7,6 +7,7 @@ import {
   Animated,
   Text,
   Image,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, {
@@ -17,6 +18,9 @@ import Svg, {
 } from "react-native-svg";
 import { colors, fontSize } from "@/constants/tokens";
 import { Href, Tabs, useRouter } from "expo-router";
+
+const { height, width } = Dimensions.get("window");
+const isSmallScreen = width < 380;
 
 const TabsNavigation: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -204,8 +208,8 @@ const TabsNavigation: React.FC = () => {
 const styles = StyleSheet.create({
   heartButtonContainer: {
     position: "absolute",
-    bottom: 45,
-    right: 35,
+    bottom: isSmallScreen ? height * 0.034 : height * 0.057,
+    right: isSmallScreen ? width * 0.08 : width * 0.09,
     width: 70,
     height: 70,
   },

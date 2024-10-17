@@ -32,6 +32,10 @@ const SettingsScreen = () => {
     router.push("/navigation/invite");
   };
 
+  const handleUnsubscribe = () => {
+    router.push("/navigation/unsubscribe");
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -93,7 +97,11 @@ const SettingsScreen = () => {
           <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionButton} activeOpacity={0.6}>
+        <TouchableOpacity
+          style={styles.optionButton}
+          activeOpacity={0.6}
+          onPress={handleUnsubscribe}
+        >
           <Text style={styles.optionText}>Unsubscribe Account</Text>
           <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </TouchableOpacity>
@@ -149,17 +157,14 @@ const SettingsScreen = () => {
 
       {/* Social Media Links */}
       <View style={styles.socialContainer}>
-        <TouchableOpacity onPress={() => openLink("https://facebook.com")}>
-          <Ionicons name="logo-facebook" size={24} color={colors.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => openLink("https://twitter.com")}>
-          <Ionicons name="logo-twitter" size={24} color={colors.primary} />
+        <TouchableOpacity onPress={() => openLink("https://tiktok.com")}>
+          <Ionicons name="logo-tiktok" size={24} color={colors.primary} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => openLink("https://instagram.com")}>
           <Ionicons name="logo-instagram" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => openLink("https://linkedin.com")}>
-          <Ionicons name="logo-linkedin" size={24} color={colors.primary} />
+        <TouchableOpacity onPress={() => openLink("https://twitter.com")}>
+          <Ionicons name="logo-twitter" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -220,7 +225,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: -10,
     marginBottom: 20,
-    paddingHorizontal: 80,
+    paddingHorizontal: 110,
   } as ViewStyle,
   versionText: {
     color: colors.primary,

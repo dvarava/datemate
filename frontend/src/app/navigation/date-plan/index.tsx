@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Modal,
   Platform,
 } from "react-native";
@@ -16,11 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams } from "expo-router";
-
-const heartsBranchFirst = require("@/assets/branches/hearts_branch_1.png");
-const heartsBranchSecond = require("@/assets/branches/hearts_branch_2.png");
-const heartsBranchThird = require("@/assets/branches/hearts_branch_3.png");
-const heartsBranchFourth = require("@/assets/branches/hearts_branch_4.png");
+import Heart from "@/svg/heart";
 
 type Activity = {
   title: string;
@@ -43,13 +38,15 @@ const DatePlanScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(Platform.OS === "ios");
 
+  // Hardcoded number of activities
+  const numberOfActivities = 5;
+
   const handleRegenerate = () => {
     router.back();
   };
 
   const handleAddToFavourites = () => {
     setIsFavourite(!isFavourite);
-    // TODO: Pass favourite data to the database
   };
 
   const handleAddToCalendar = () => {
@@ -65,7 +62,6 @@ const DatePlanScreen: React.FC = () => {
   const handleScheduleDate = () => {
     console.log("Scheduled Date: ", selectedDate.toLocaleDateString());
     setCalendarModalVisible(false);
-    // TODO: Pass selectedDate to the database for calendar event
   };
 
   const handleInfoPress = (index: number) => {
@@ -73,7 +69,6 @@ const DatePlanScreen: React.FC = () => {
     setModalVisible(true);
   };
 
-  // TODO: Replace hardcoded activities with data from the database
   const activityDetails: Activity[] = [
     {
       title: "Pizza & Sunset",
@@ -113,14 +108,7 @@ const DatePlanScreen: React.FC = () => {
   ];
 
   const renderPlanCards = () => {
-    const branches = [
-      { src: heartsBranchFirst, style: styles.branchFirst },
-      { src: heartsBranchSecond, style: styles.branchSecond },
-      { src: heartsBranchThird, style: styles.branchThird },
-      { src: heartsBranchFourth, style: styles.branchFourth },
-    ];
-
-    return activityDetails.map((activity, index) => {
+    return activityDetails.slice(0, numberOfActivities).map((activity, index) => {
       const isLeft = index % 2 === 0;
       return (
         <React.Fragment key={index}>
@@ -131,6 +119,21 @@ const DatePlanScreen: React.FC = () => {
               (index === 2 || index === 4) && styles.alignedLeftCard,
             ]}
           >
+            <View
+              style={{
+                position: "absolute",
+                top: -20,
+                left: "50%",
+                transform: [{ translateX: -5 }],
+                zIndex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Heart size={40} />
+              <Text style={styles.heartText}>{index + 1}</Text>
+            </View>
+
             <Text style={styles.cardTitle}>{activity.title}</Text>
             <View style={styles.cardDetailContainer}>
               <Ionicons
@@ -170,12 +173,6 @@ const DatePlanScreen: React.FC = () => {
               />
             </TouchableOpacity>
           </View>
-          {index < activityDetails.length - 1 && (
-            <Image
-              source={branches[index % 4].src}
-              style={[styles.branch, branches[index % 4].style]}
-            />
-          )}
         </React.Fragment>
       );
     });
@@ -186,7 +183,8 @@ const DatePlanScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.section}>
           <Text style={styles.title}>
-            Perfect date plan for {"\n"}You & Anna
+            Perfect Date Plan {"\n"}
+            <Text style={{ fontFamily: "Nunito-Regular" }}>You & Anna</Text>
           </Text>
           <View style={styles.datePlan}>{renderPlanCards()}</View>
 
@@ -213,7 +211,10 @@ const DatePlanScreen: React.FC = () => {
           <View
             style={[
               styles.buttonContainer,
-              showRegenerateButton === "false" && { justifyContent: 'center', gap: 20 },
+              showRegenerateButton === "false" && {
+                justifyContent: "center",
+                gap: 20,
+              },
             ]}
           >
             <TouchableOpacity
@@ -265,6 +266,7 @@ const DatePlanScreen: React.FC = () => {
         </View>
       </ScrollView>
 
+      {/* Modals for Date Scheduling and Activity Information */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.primary,
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 40,
     fontFamily: "Nunito-Black",
   },
   datePlan: {
@@ -423,6 +425,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     paddingBottom: 30,
+    paddingTop: 20,
     width: "43%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -438,32 +441,10 @@ const styles = StyleSheet.create({
   rightCard: {
     alignSelf: "flex-end",
     marginBottom: 40,
-    marginTop: -50,
+    marginTop: -70,
   },
   alignedLeftCard: {
     marginTop: -70,
-  },
-  branch: {
-    position: "absolute",
-    width: 140,
-    height: 140,
-    zIndex: -1,
-  },
-  branchFirst: {
-    top: 20,
-    left: 115,
-  },
-  branchSecond: {
-    top: 110,
-    left: 80,
-  },
-  branchThird: {
-    top: 220,
-    left: 125,
-  },
-  branchFourth: {
-    top: 320,
-    left: 70,
   },
   cardTitle: {
     fontSize: 14,
@@ -623,6 +604,14 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     color: colors.primary,
     fontFamily: "Nunito-Bold",
+  },
+  heartText: {
+    position: "absolute",
+    fontSize: 14,
+    fontWeight: "bold",
+    color: colors.primary,
+    textAlign: "center",
+    fontFamily: "Nunito-Black",
   },
 });
 
