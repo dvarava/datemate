@@ -30,6 +30,8 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({
 
   const flatListRef = useRef<FlatList<any>>(null);
 
+  const allSpecialDates = [...specialDates];
+
   const getWeekDates = (startDate: Date) => {
     const weekDates = [];
     const dayOfWeek = (startDate.getDay() + 6) % 7;
@@ -57,7 +59,6 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({
       today.getDate() - dayOfWeek - numWeeksBefore * 7
     );
 
-    const totalWeeks = numWeeksBefore + numWeeksAfter + 1;
     for (let i = 0; i < totalWeeks; i++) {
       const weekStart = new Date(
         startDate.getFullYear(),
@@ -84,27 +85,32 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({
     <View style={styles.weekContainer}>
       <View style={styles.rowContainer}>
         {item.map((date, index) => {
-          const isSpecial = specialDates.some(
+          const isSpecial = allSpecialDates.some(
             (specialDate) =>
               specialDate.getDate() === date.getDate() &&
               specialDate.getMonth() === date.getMonth() &&
               specialDate.getFullYear() === date.getFullYear()
           );
+          const todaySpecial = isToday(date) && isSpecial;
+          const today = isToday(date) && !isSpecial;
+
           return (
             <View key={index} style={styles.columnContainer}>
               <Text style={styles.dayText}>{daysOfWeek[index]}</Text>
               <TouchableOpacity
                 style={[
                   styles.dateContainer,
-                  isSpecial && styles.specialDateContainer,
-                  isToday(date) && styles.todayDateContainer,
+                  todaySpecial && styles.specialDateContainer,
+                  today && styles.todayDateContainer,
+                  isSpecial && !todaySpecial && styles.specialDateContainer,
                 ]}
                 activeOpacity={0.7}
               >
                 <Text
                   style={[
                     styles.dateText,
-                    isSpecial && styles.specialDateText,
+                    (isSpecial && !todaySpecial) && styles.specialDateText,
+                    today && styles.todayDateText,
                   ]}
                 >
                   {date.getDate()}
@@ -182,6 +188,10 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito-Bold",
   },
   specialDateText: {
+    color: colors.primary,
+    fontFamily: "Nunito-Bold",
+  },
+  todayDateText: {
     color: colors.primary,
     fontFamily: "Nunito-Bold",
   },
