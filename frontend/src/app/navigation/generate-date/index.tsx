@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import Avatar from "@/components/Avatar";
 import CustomSlider from "@/components/CustomSlider";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { useDateStore } from "@/store/dateStore";
+import { Partner } from '../../../store/types/partner';
 
 const GenerateDateScreen = () => {
   const router = useRouter();
@@ -52,16 +53,20 @@ const GenerateDateScreen = () => {
     useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const { generateDatePlan } = useDateStore();
+  const { generateDatePlan, partners, fetchPartners } = useDateStore();
 
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const partners: Profile[] = [
-    { id: "1", name: "Anna", age: 21, avatarGradient: ["#ff0262", "#fff"] },
-    { id: "2", name: "Diana", age: 23, avatarGradient: ["#4469d2", "#fff"] },
-    { id: "3", name: "Tamara", age: 48, avatarGradient: ["#d244ac", "#fff"] },
-  ];
+  useEffect(() => {
+    const loadPartners = async () => {
+      setLoading(true);
+      await fetchPartners();
+      setLoading(false);
+    };
+    loadPartners();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -204,6 +209,15 @@ const GenerateDateScreen = () => {
     }
   };
 
+  // Map partners to profiles format
+  const partnerProfiles = partners.map(partner => ({
+    id: partner._id,
+    name: partner.name,
+    age: partner.age,
+    gender: partner.gender,
+    avatarGradient: partner.avatarGradient || ['#4469d2', '#fff'],
+  }));
+
   return (
     <View style={styles.container}>
       <Modal
@@ -269,14 +283,18 @@ const GenerateDateScreen = () => {
           </SafeAreaView>
 
           <View style={styles.modalContent}>
-            <PartnersList
-              profiles={partners}
-              showActions={false}
-              onSelect={(partner) => {
-                setSelectedPartner(`${partner.name}, ${partner.age}`);
-                setModalVisible(false);
-              }}
-            />
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.secondary} />
+            ) : (
+              <PartnersList
+                profiles={partnerProfiles}
+                showActions={false}
+                onSelect={(profile) => {
+                  setSelectedPartner(`${profile.name}, ${profile.age}`);
+                  setModalVisible(false);
+                }}
+              />
+            )}
           </View>
         </Modal>
 

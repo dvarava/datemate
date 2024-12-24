@@ -29,21 +29,23 @@ const App = () => {
       </View>
     );
   }
-
-  // return isAuthenticated ? (
-  //   <SafeAreaProvider>
-  //     <RootNavigation />
-  //     <StatusBar style="auto" />
-  //   </SafeAreaProvider>
-  // ) : (
-  //   <AuthScreen />
-  // );
-  return  (
+  // Login screen for production build
+  return isAuthenticated ? (
     <SafeAreaProvider>
       <RootNavigation />
       <StatusBar style="auto" />
     </SafeAreaProvider>
+  ) : (
+    <AuthScreen />
   );
+
+  // Uncomment this block for development build and comment the above block
+  // return  (
+  //   <SafeAreaProvider>
+  //     <RootNavigation />
+  //     <StatusBar style="auto" />
+  //   </SafeAreaProvider>
+  // );
 };
 
 const RootNavigation = () => {
