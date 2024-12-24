@@ -63,10 +63,12 @@ const GenerateDateScreen = () => {
     const loadPartners = async () => {
       setLoading(true);
       await fetchPartners();
+      console.log("Fetched partners:", partners); // Debug
       setLoading(false);
     };
     loadPartners();
   }, []);
+  
 
   useFocusEffect(
     useCallback(() => {
@@ -139,6 +141,20 @@ const GenerateDateScreen = () => {
         ? currentLocationAddress
         : otherLocationAddress;
 
+    // Find selected partner details
+    const selectedPartnerName = selectedPartner?.split(",")[0].trim();
+    const partnerDetails = partners.find(
+      (p) => p.name.trim() === selectedPartnerName
+    );
+
+    if (!partnerDetails) {
+      console.log("Selected Partner:", selectedPartnerName);
+      console.log("Partners List:", partners);
+      Alert.alert("Error", "Partner details not found.");
+      return;
+    }
+
+
     const data = {
       activityAmount,
       budget,
@@ -149,12 +165,20 @@ const GenerateDateScreen = () => {
       preference,
       selectedLocation,
       locationCoords,
-      locationAddress,
-      partners: selectedPartner,
+      locationAddress:
+        selectedLocation === "myLocation" ? currentLocationAddress : otherLocationAddress,
+      partner: {
+        name: selectedPartnerName,
+        age: partnerDetails.age,
+        interests: partnerDetails.interests,
+        personalityType: partnerDetails.personalityType,
+        dietaryPreferences: partnerDetails.dietaryPreferences,
+      },
     };
 
     setIsGenerating(true);
     try {
+      console.log("Data being passed:", data);
       await generateDatePlan(data);
       setIsGenerating(false);
       router.push({
