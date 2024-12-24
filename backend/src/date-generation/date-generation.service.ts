@@ -3,6 +3,7 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { AxiosResponse } from "axios";
 import { DatePlanInput } from "./types/datePlan";
+import * as dotenv from 'dotenv';
 
 @Injectable()
 export class DateGenerationService {
@@ -27,7 +28,7 @@ export class DateGenerationService {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer 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`,
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           },
         }
       )
