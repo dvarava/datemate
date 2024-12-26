@@ -19,7 +19,7 @@ export class DateGenerationService {
       this.httpService.post(
         "https://api.openai.com/v1/chat/completions",
         {
-          model: "gpt-3.5-turbo",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: prompt },
@@ -41,6 +41,11 @@ export class DateGenerationService {
     console.log("OpenAI Response:", generatedMessage);
 
     return response.data;
+  }
+
+  private truncateDescription(description: string, maxLength: number): string {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength).trimEnd() + '...';
   }
 
   createPrompt(data: any) {
@@ -73,7 +78,11 @@ export class DateGenerationService {
   - Setting: ${preference}
   - Location: ${locationAddress}`;
   
-    const initialPrompt = `I’m a boy and wanna take a girl on a date. You will need to generate a perfect date plan for me to satisfy my partner. You will be given details about my partner: her age, her interests, her personality type, her dietary preference. Also you will be given budget for the date, number of activities, location, mood, preferable time of day, setting (indoors/outdoors/mix). I need you to come up with a creative memorable date. Plan this date in this format:
+  // Making the description shorter
+    const briefDescription = "Keep the 'Brief date description' under 50 characters.";
+    const limitedDescription = this.truncateDescription(briefDescription, 50);
+
+    const initialPrompt = `I’m a boy and wanna take a girl on a date. You will need to generate a perfect date plan for me to satisfy my partner. You will be given details about my partner: her age, her interests, her personality type, her dietary preference. Also you will be given budget for the date, number of activities, location, mood, preferable time of day, setting (indoors/outdoors/mix). I need you to come up with a creative memorable date. Keep it straigh to the point, I dont need overall descriptions. Plan this date in this format:
   
   Activity 1:
   *short name of the date* (Example: Pizza & Sunset)
@@ -81,7 +90,7 @@ export class DateGenerationService {
   Address: *address*
   Cost: *calculated cost*
   
-  Brief date description: *explaining the date, why it will satisfy the partner*
+  Brief date description: ${limitedDescription}
   
   ${partnerDetails}
   
