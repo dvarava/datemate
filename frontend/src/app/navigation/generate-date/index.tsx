@@ -167,13 +167,7 @@ const GenerateDateScreen = () => {
       locationCoords,
       locationAddress:
         selectedLocation === "myLocation" ? currentLocationAddress : otherLocationAddress,
-      partner: {
-        name: selectedPartnerName,
-        age: partnerDetails.age,
-        interests: partnerDetails.interests,
-        personalityType: partnerDetails.personalityType,
-        dietaryPreferences: partnerDetails.dietaryPreferences,
-      },
+      partnerId: partnerDetails._id // Change this line to use _id instead of partner object
     };
 
     setIsGenerating(true);
@@ -184,8 +178,8 @@ const GenerateDateScreen = () => {
       router.push({
         pathname: "/navigation/date-plan",
         params: {
-          showRegenerateButton: "true",
-        },
+          partnerId: partnerDetails._id // Update params to use _id
+        }
       });
     } catch (error) {
       setIsGenerating(false);

@@ -8,7 +8,6 @@ import { UsersModule } from './users/users.module';
 import { PartnerModule } from './partner/partner.module';
 import { DateGenerationModule } from './date-generation/date-generation.module';
 
-
 @Module({
   imports: [
     AuthModule,

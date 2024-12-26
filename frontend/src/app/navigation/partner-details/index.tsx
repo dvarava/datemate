@@ -21,6 +21,7 @@ import Dropdown from "@/components/Dropdown";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { usePartnerStore } from "@/store/partner.store";
 import { Partner } from "../../../store/types/partner";
+import { useDateStore } from "@/store/dateStore";
 
 const dietIcons = {
   Vegan: require("@/assets/diet_icons/vegan.png"),
@@ -51,6 +52,7 @@ const dietOptions = Object.keys(dietIcons);
 const PartnerDetailsScreen: React.FC = () => {
   const { partnerId } = useLocalSearchParams();
   const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
+  const { dateHistory, getDatePlanByPartner } = useDateStore();
 
   const partner = fetchPartnerById(partnerId as string);
   useEffect(() => {
@@ -62,6 +64,20 @@ const PartnerDetailsScreen: React.FC = () => {
       setSelectedDiet(partner.dietaryPreferences || []);
     }
   }, [partner]);
+
+  useEffect(() => {
+    const loadDatePlan = async () => {
+      if (partnerId) {
+        try {
+          await getDatePlanByPartner(partnerId as string);
+        } catch (error) {
+          console.error('Error loading date plan:', error);
+        }
+      }
+    };
+
+    loadDatePlan();
+  }, [partnerId]);
 
   const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
   const [partnerName, setPartnerName] = useState("");
@@ -81,32 +97,18 @@ const PartnerDetailsScreen: React.FC = () => {
 
   const router = useRouter();
 
-  // Hardcoded date histories
-  const [histories, setHistories] = useState<DateHistory[]>([
-    {
-      id: "1",
-      name: "Anna",
-      age: "21",
-      dateDescription: "Romantic dinner followed by a sunset walk",
-      date: "2024-01-15",
-      isFavorite: false,
-      avatarGradient: ["#ff0262", "#ffffff"],
-    },
-    {
-      id: "2",
-      name: "Anna",
-      age: "21",
-      dateDescription: "Movie night and stargazing",
-      date: "2024-02-10",
-      isFavorite: true,
-      avatarGradient: ["#d244ac", "#fff"],
-    },
-  ]);
+  const [histories, setHistories] = useState<DateHistory[]>([]);
+
+  useEffect(() => {
+    if (dateHistory) {
+      setHistories([dateHistory]);
+    }
+  }, [dateHistory]);
 
   const handleFavoriteToggle = (id: string) => {
-    setHistories((prevHistories) =>
-      prevHistories.map((history) =>
-        history.id === id
+    setHistories(prevHistories => 
+      prevHistories.map((history: DateHistory) =>
+        history.id === id 
           ? { ...history, isFavorite: !history.isFavorite }
           : history
       )

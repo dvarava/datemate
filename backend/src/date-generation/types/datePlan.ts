@@ -1,19 +1,37 @@
 export interface DatePlanInput {
-    activityAmount: number;
+  partnerId: string;
+  activityAmount: number;
+  budget: number;
+  moodSelection: string[];
+  adjustToWeather: boolean;
+  selectedTime: string;
+  duration: number;
+  preference: string;
+  locationAddress: string;
+}
+
+export interface DatePlanResponse {
+  datePlan: {
+    _id: string;
+    partner: string;
+    numberOfActivities: number;
+    location: string;
     budget: number;
-    moodSelection: string[];
-    adjustToWeather: boolean | null;
-    selectedTime: string | null;
+    mood: string[];
+    adjustToWeather: boolean;
+    dayTime: string;
     duration: number;
-    preference: string;
-    selectedLocation: string;
-    locationCoords: { latitude: number; longitude: number } | null;
-    locationAddress: string | null;
-    partner: {
-      name: string;
-      age: number;
-      interests: string[];
-      personalityType: string;
-      dietaryPreferences: string[] | null;
-    };
-  }
+    preferredPlace: string;
+    isFavourite: boolean;
+    createdAt: Date;
+  };
+  activities: {
+    _id: string;
+    datePlanId: string;
+    name: string;
+    location: string;
+    address: string;
+    cost: number;
+    description: string;
+  }[];
+}
