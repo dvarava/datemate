@@ -59,7 +59,7 @@ const holidays = [
   { name: "World Compliment Day", date: new Date(new Date().getFullYear(), 2, 1) },
   { name: "National Lover’s Day", date: new Date(new Date().getFullYear(), 3, 23) },
   { name: "Couple Appreciation Day", date: new Date(new Date().getFullYear(), 4, 1) },
-  { name: "National Loving Day", date: new Date(new Date().getFullYear(), 5, 12) },
+  { name: "National Loving Day", date: new Date(new Date().getFullYear(), 5, 12) }, 
   { name: "National Kissing Day", date: new Date(new Date().getFullYear(), 5, 22) },
   { name: "Hug Holiday", date: new Date(new Date().getFullYear(), 5, 29) },
   { name: "International Kissing Day", date: new Date(new Date().getFullYear(), 6, 6) },

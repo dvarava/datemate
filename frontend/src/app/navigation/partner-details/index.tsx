@@ -57,6 +57,8 @@ const PartnerDetailsScreen: React.FC = () => {
   const partner = fetchPartnerById(partnerId as string);
   useEffect(() => {
     if (partner) {
+      console.log('Partner data:', partner);
+      console.log('Dietary preferences:', partner.dietaryPreferences);
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
       setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
@@ -433,17 +435,21 @@ const PartnerDetailsScreen: React.FC = () => {
                 </TouchableOpacity>
               ) : (
                 <View style={styles.dietButtonContainer}>
-                  {selectedDiet.map((diet) => (
-                    <View key={diet} style={styles.dietWrapper}>
-                      <Image
-                        source={
-                          darkDietIcons[diet as keyof typeof darkDietIcons]
-                        }
-                        style={styles.dietIcon}
-                      />
-                      <Text style={styles.dietText}>{diet}</Text>
-                    </View>
-                  ))}
+                  {selectedDiet && selectedDiet.length > 0 ? (
+                    selectedDiet.map((diet) => (
+                      <View key={diet} style={styles.dietWrapper}>
+                        <Image
+                          source={
+                            darkDietIcons[diet as keyof typeof darkDietIcons]
+                          }
+                          style={styles.dietIcon}
+                        />
+                        <Text style={styles.dietText}>{diet}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.description}>No dietary preferences set</Text>
+                  )}
                 </View>
               )}
             </View>

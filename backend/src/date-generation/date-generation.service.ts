@@ -205,7 +205,7 @@ export class DateGenerationService {
     const dateHistory = activities.length > 0 ? {
       id: datePlan._id,
       name: datePlan.partnerName,
-      age: partner.age.toString(), // Add age here
+      age: partner.age.toString(),
       dateDescription: activities[0].description,
       date: datePlan.createdAt.toISOString().split('T')[0],
       isFavorite: datePlan.isFavourite,
