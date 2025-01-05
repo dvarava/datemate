@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Modal,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { colors, fontSize } from "@/constants/tokens";
 import { useRouter } from "expo-router";
@@ -16,37 +17,37 @@ import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams } from "expo-router";
 import Heart from "@/svg/heart";
-
-type Activity = {
-  title: string;
-  location: string;
-  address: string;
-  cost: string;
-  briefDescription: string;
-};
+import { useDateStore } from "@/store/dateStore";
+import { Activity } from "@/store/types/date";
 
 const DatePlanScreen: React.FC = () => {
   const router = useRouter();
-  const { showRegenerateButton } = useLocalSearchParams();
+  const { partnerId, showRegenerateButton } = useLocalSearchParams();
+  const { datePlan, activities, dateHistory, getDatePlanByPartner, setFavorite } = useDateStore();
 
-  const [isFavourite, setIsFavourite] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
-    null
-  );
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(Platform.OS === "ios");
 
-  // Hardcoded number of activities
-  const numberOfActivities = 5;
+  // Fetch date plan data when component mounts
+  useEffect(() => {
+    if (partnerId) {
+      getDatePlanByPartner(partnerId as string)
+        .then(() => {
+          console.log('Fetched activities:', activities); // Debug log
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+  }, [partnerId]);
 
-  const handleRegenerate = () => {
-    router.back();
-  };
-
-  const handleAddToFavourites = () => {
-    setIsFavourite(!isFavourite);
+  const handleAddToFavourites = async () => {
+    if (datePlan) {
+      await setFavorite(!datePlan.isFavourite);
+    }
   };
 
   const handleAddToCalendar = () => {
@@ -65,53 +66,15 @@ const DatePlanScreen: React.FC = () => {
   };
 
   const handleInfoPress = (index: number) => {
-    setSelectedActivity(activityDetails[index]);
+    setSelectedActivity(activities[index]);
     setModalVisible(true);
   };
 
-  const activityDetails: Activity[] = [
-    {
-      title: "Pizza & Sunset",
-      location: "Chilli Pizza",
-      address: "Dzimavu Street 23",
-      cost: "$30",
-      briefDescription: "Enjoy a delicious pizza while watching the sunset.",
-    },
-    {
-      title: "Movie Night",
-      location: "Central Cinema",
-      address: "Main Street 45",
-      cost: "$20",
-      briefDescription: "Catch the latest blockbuster at the cinema.",
-    },
-    {
-      title: "Horse Riding",
-      location: "Sunset Ranch",
-      address: "Greenway 12",
-      cost: "$50",
-      briefDescription: "Experience horse riding at the beautiful ranch.",
-    },
-    {
-      title: "Art Museum Visit",
-      location: "National Gallery",
-      address: "Liberty Avenue 5",
-      cost: "$15",
-      briefDescription: "Explore art masterpieces at the gallery.",
-    },
-    {
-      title: "Concert",
-      location: "City Arena",
-      address: "Stadium Road 3",
-      cost: "$40",
-      briefDescription: "Enjoy live music at the arena.",
-    },
-  ];
-
   const renderPlanCards = () => {
-    return activityDetails.slice(0, numberOfActivities).map((activity, index) => {
+    return activities.slice(0, datePlan?.numberOfActivities).map((activity, index) => {
       const isLeft = index % 2 === 0;
       return (
-        <React.Fragment key={index}>
+        <React.Fragment key={activity._id}>
           <View
             style={[
               styles.planCard,
@@ -134,7 +97,7 @@ const DatePlanScreen: React.FC = () => {
               <Text style={styles.heartText}>{index + 1}</Text>
             </View>
 
-            <Text style={styles.cardTitle}>{activity.title}</Text>
+            <Text style={styles.cardTitle}>{activity.name}</Text>
             <View style={styles.cardDetailContainer}>
               <Ionicons
                 name="storefront-outline"
@@ -153,14 +116,8 @@ const DatePlanScreen: React.FC = () => {
               />
               <Text style={styles.cardDetail}>{activity.address}</Text>
             </View>
-            <SubscriptionGuard
-              isPremium={false}
-              lockedText="Cost: "
-              textStyle={{ fontSize: fontSize.xs }}
-              iconSize={14}
-              lockedTextMarginRight={0}
-            >
-              <Text style={styles.cardDetail}>Cost: {activity.cost}</Text>
+            <SubscriptionGuard isPremium={false}>
+              <Text style={styles.cardDetail}>Cost: ${activity.cost}</Text>
             </SubscriptionGuard>
             <TouchableOpacity
               onPress={() => handleInfoPress(index)}
@@ -178,34 +135,32 @@ const DatePlanScreen: React.FC = () => {
     });
   };
 
+  // Add loading state
+  if (!datePlan || !activities.length) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.section}>
           <Text style={styles.title}>
             Perfect Date Plan {"\n"}
-            <Text style={{ fontFamily: "Nunito-Regular" }}>You & Anna</Text>
+            <Text style={{ fontFamily: "Nunito-Regular" }}>You & {datePlan.partnerName}</Text>
           </Text>
           <View style={styles.datePlan}>{renderPlanCards()}</View>
 
           <View style={styles.detailsContainer}>
-            {[
-              "Date mood",
-              "Adjust to weather",
-              "Time of the day",
-              "Date duration",
-              "Area preference",
-              "Level of risk",
-              "Initial budget",
-              "Total cost",
-            ].map((detail) => (
-              <View key={detail} style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{detail}:</Text>
-                <SubscriptionGuard isPremium={false}>
-                  <Text style={styles.detailValue}>Value here</Text>
-                </SubscriptionGuard>
-              </View>
-            ))}
+            {/* Replace hardcoded values with actual data */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Date mood:</Text>
+              <Text style={styles.detailValue}>{datePlan.mood.join(', ')}</Text>
+            </View>
+            {/* ... other details ... */}
           </View>
 
           <View
@@ -223,7 +178,7 @@ const DatePlanScreen: React.FC = () => {
             >
               <View style={styles.basicBottomButton}>
                 <Ionicons
-                  name={isFavourite ? "heart" : "heart-outline"}
+                  name={datePlan.isFavourite ? "heart" : "heart-outline"}
                   size={28}
                   color={colors.secondary}
                 />
@@ -353,7 +308,7 @@ const DatePlanScreen: React.FC = () => {
               {selectedActivity && (
                 <>
                   <Text style={styles.modalTitle}>
-                    {selectedActivity.title}
+                    {selectedActivity.name}
                   </Text>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalDetailTitle}>Location: </Text>
@@ -384,7 +339,7 @@ const DatePlanScreen: React.FC = () => {
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalDetailTitle}>Description: </Text>
                     <Text style={styles.modalDetailText}>
-                      {selectedActivity.briefDescription}
+                      {selectedActivity.description}
                     </Text>
                   </View>
                 </>

@@ -1,4 +1,6 @@
 export interface Activity {
+    _id: string;
+    datePlanID: string;
     name: string;
     location: string;
     address: string;
@@ -8,7 +10,8 @@ export interface Activity {
   
 export interface DatePlan {
     _id: string;
-    partner: string;
+    partnerId: string;
+    partnerName: string;
     numberOfActivities: number;
     location: string;
     budget: number;
@@ -19,6 +22,7 @@ export interface DatePlan {
     preferredPlace: string;
     isFavourite: boolean;
     createdAt: Date;
+    totalCost: number;
   }
 
 export interface DateHistory {

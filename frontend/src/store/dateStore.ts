@@ -39,15 +39,32 @@ export const useDateStore = create<DateState>((set, get) => ({
   getDatePlanByPartner: async (partnerId: string) => {
     try {
       const response = await axios.get(`http://localhost:3000/generate-date/${partnerId}`);
+      if (!response.data.datePlan) {
+        set({
+          datePlan: null,
+          activities: [],
+          dateHistory: null
+        });
+        return;
+      }
       set({ 
         datePlan: response.data.datePlan,
         activities: response.data.activities,
         dateHistory: response.data.dateHistory
       });
       console.log('Fetched Date Plan:', response.data);
-    } catch (error) {
-      console.error('Error fetching date plan:', error);
-      throw error;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        // Suppress the error and set datePlan to null
+        set({
+          datePlan: null,
+          activities: [],
+          dateHistory: null,
+        });
+      } else {
+        console.error('Error fetching date plan:', error);
+        throw error;
+      }
     }
   },
 

@@ -116,7 +116,12 @@ export class DateGenerationService {
         name: lines.find(l => l.includes('*'))?.replace(/\*/g, '').trim(),
         location: lines.find(l => l.includes('Location:'))?.split('Location:')[1]?.trim(),
         address: lines.find(l => l.includes('Address:'))?.split('Address:')[1]?.trim(),
-        cost: parseInt(lines.find(l => l.includes('Cost:'))?.split('Cost:')[1]?.replace('$', '').trim() || '0'),
+        cost: parseInt(
+          lines
+            .find(l => l.includes('Cost:'))
+            ?.split('Cost:')[1]
+            ?.replace(/[^\d]/g, '') || '0'
+        ),
         description: lines.find(l => l.includes('Brief date description:'))?.split('Brief date description:')[1]?.trim(),
       };
 
