@@ -9,18 +9,18 @@ interface DateState {
   datePlan: DatePlan | null;
   activities: Activity[];
   partners: Partner[];
-  dateHistory: DateHistory | null;
+  dateHistories: DateHistory[]; // Changed from dateHistory to dateHistories
   generateDatePlan: (data: any) => Promise<void>;
   fetchPartners: () => Promise<void>;
   getDatePlanByPartner: (partnerId: string) => Promise<void>;
-  setFavorite: (isFavorite: boolean) => Promise<void>;
+  setFavorite: (dateId: string, isFavorite: boolean) => Promise<void>;
 }
 
 export const useDateStore = create<DateState>((set, get) => ({
   datePlan: null,
   activities: [],
   partners: [],
-  dateHistory: null,
+  dateHistories: [], // Initialize as empty array
 
   generateDatePlan: async (data: any) => {
     try {
@@ -39,27 +39,35 @@ export const useDateStore = create<DateState>((set, get) => ({
   getDatePlanByPartner: async (partnerId: string) => {
     try {
       const response = await axios.get(`http://localhost:3000/generate-date/${partnerId}`);
-      if (!response.data.datePlan) {
+      console.log('API Response:', response.data); // Debug log
+
+      if (!response.data) {
         set({
           datePlan: null,
           activities: [],
-          dateHistory: null
+          dateHistories: []
         });
         return;
       }
+
+      // Extract the dateHistory array from the response
+      const dateHistories = Array.isArray(response.data.dateHistory) 
+        ? response.data.dateHistory 
+        : [response.data.dateHistory].filter(Boolean);
+
       set({ 
         datePlan: response.data.datePlan,
         activities: response.data.activities,
-        dateHistory: response.data.dateHistory
+        dateHistories: dateHistories
       });
-      console.log('Fetched Date Plan:', response.data);
+
+      console.log('Set date histories:', dateHistories); // Debug log
     } catch (error: any) {
       if (error.response?.status === 404) {
-        // Suppress the error and set datePlan to null
         set({
           datePlan: null,
           activities: [],
-          dateHistory: null,
+          dateHistories: [],
         });
       } else {
         console.error('Error fetching date plan:', error);
@@ -68,16 +76,25 @@ export const useDateStore = create<DateState>((set, get) => ({
     }
   },
 
-  setFavorite: async (isFavorite: boolean) => {
+  setFavorite: async (dateId: string, isFavorite: boolean) => {
     try {
-      const { datePlan } = get();
-      if (!datePlan?._id) return;
-
-      const response = await axios.patch(`http://localhost:3000/generate-date/${datePlan._id}`, {
+      await axios.patch(`http://localhost:3000/generate-date/${dateId}`, {
         isFavourite: isFavorite
       });
       
-      set({ datePlan: { ...datePlan, isFavourite: isFavorite } });
+      // Update the favorite status in both datePlan and dateHistories
+      const { datePlan, dateHistories } = get();
+      
+      set({
+        datePlan: datePlan?._id === dateId 
+          ? { ...datePlan, isFavourite: isFavorite }
+          : datePlan,
+        dateHistories: dateHistories.map(history =>
+          history.id === dateId
+            ? { ...history, isFavorite: isFavorite }
+            : history
+        )
+      });
     } catch (error) {
       console.error('Error updating favorite status:', error);
       throw error;
@@ -105,4 +122,3 @@ export const useDateStore = create<DateState>((set, get) => ({
     }
   },
 }));
-

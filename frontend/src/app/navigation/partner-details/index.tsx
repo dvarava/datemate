@@ -52,8 +52,7 @@ const dietOptions = Object.keys(dietIcons);
 const PartnerDetailsScreen: React.FC = () => {
   const { partnerId } = useLocalSearchParams();
   const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
-  const { dateHistory, getDatePlanByPartner } = useDateStore();
-
+  const { dateHistories, getDatePlanByPartner } = useDateStore();
   const partner = fetchPartnerById(partnerId as string);
   useEffect(() => {
     if (partner) {
@@ -68,17 +67,17 @@ const PartnerDetailsScreen: React.FC = () => {
   }, [partner]);
 
   useEffect(() => {
-    const loadDatePlan = async () => {
+    const loadDateHistory = async () => {
       if (partnerId) {
         try {
           await getDatePlanByPartner(partnerId as string);
         } catch (error) {
-          console.error('Error loading date plan:', error);
+          console.error('Error loading date history:', error);
         }
       }
     };
 
-    loadDatePlan();
+    loadDateHistory();
   }, [partnerId]);
 
   const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
@@ -100,12 +99,6 @@ const PartnerDetailsScreen: React.FC = () => {
   const router = useRouter();
 
   const [histories, setHistories] = useState<DateHistory[]>([]);
-
-  useEffect(() => {
-    if (dateHistory) {
-      setHistories([dateHistory]);
-    }
-  }, [dateHistory]);
 
   const handleFavoriteToggle = (id: string) => {
     setHistories(prevHistories => 

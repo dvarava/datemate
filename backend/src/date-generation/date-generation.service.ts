@@ -189,13 +189,14 @@ export class DateGenerationService {
   }
 
   async getDatePlanByPartner(partnerId: string) {
-    const datePlan = await this.datePlanModel
-      .findOne({ partnerId })
+    // Get all date plans for the partner, sorted by creation date
+    const datePlans = await this.datePlanModel
+      .find({ partnerId })
       .sort({ createdAt: -1 })
       .exec();
   
-    if (!datePlan) {
-      throw new NotFoundException(`Date plan not found for partner ${partnerId}`);
+    if (!datePlans || datePlans.length === 0) {
+      throw new NotFoundException(`No date plans found for partner ${partnerId}`);
     }
   
     const partner = await this.partnerModel.findById(partnerId);
@@ -203,20 +204,44 @@ export class DateGenerationService {
       throw new NotFoundException(`Partner not found with id ${partnerId}`);
     }
   
-    const activities = await this.activityModel
-      .find({ datePlanId: datePlan._id })
+    // Get the most recent date plan for current display
+    const mostRecentPlan = datePlans[0];
+  
+    // Get activities for all date plans
+    const allActivities = await this.activityModel
+      .find({
+        datePlanId: { $in: datePlans.map(plan => plan._id) }
+      })
       .exec();
   
-    const dateHistory = activities.length > 0 ? {
-      id: datePlan._id,
-      name: datePlan.partnerName,
-      age: partner.age.toString(),
-      dateDescription: activities[0].description,
-      date: datePlan.createdAt.toISOString().split('T')[0],
-      isFavorite: datePlan.isFavourite,
-      avatarGradient: ["#ff0262", "#ffffff"]
-    } : null;
+    // Create date histories for all plans
+    const dateHistories = await Promise.all(
+      datePlans.map(async (plan) => {
+        const planActivities = allActivities.filter(
+          activity => activity.datePlanId.toString() === plan._id.toString()
+        );
+        
+        return {
+          id: plan._id,
+          name: plan.partnerName,
+          age: partner.age.toString(),
+          dateDescription: planActivities[0]?.description || 'No description available',
+          date: plan.createdAt.toISOString().split('T')[0],
+          isFavorite: plan.isFavourite,
+          avatarGradient: ["#ff0262", "#ffffff"]
+        };
+      })
+    );
   
-    return { datePlan, activities, dateHistory };
+    // Get activities for the most recent plan
+    const currentActivities = allActivities.filter(
+      activity => activity.datePlanId.toString() === mostRecentPlan._id.toString()
+    );
+  
+    return {
+      datePlan: mostRecentPlan,
+      activities: currentActivities,
+      dateHistory: dateHistories
+    };
   }
 }
