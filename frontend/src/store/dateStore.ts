@@ -6,73 +6,32 @@ import { Partner } from './types/partner';
 import { Activity, DatePlan, DateHistory } from './types/date';
 
 interface DateState {
-  datePlan: DatePlan | null;
+  datePlans: DatePlan[];
   activities: Activity[];
   partners: Partner[];
-  dateHistories: DateHistory[]; // Changed from dateHistory to dateHistories
-  generateDatePlan: (data: any) => Promise<void>;
-  fetchPartners: () => Promise<void>;
+  dateHistories: DateHistory[];
   getDatePlanByPartner: (partnerId: string) => Promise<void>;
+  fetchPartners: () => Promise<void>;
   setFavorite: (dateId: string, isFavorite: boolean) => Promise<void>;
 }
 
 export const useDateStore = create<DateState>((set, get) => ({
-  datePlan: null,
+  datePlans: [],
   activities: [],
   partners: [],
-  dateHistories: [], // Initialize as empty array
-
-  generateDatePlan: async (data: any) => {
-    try {
-      const response = await axios.post('http://localhost:3000/generate-date', data);
-      set({ 
-        datePlan: response.data.datePlan,
-        activities: response.data.activities 
-      });
-      console.log('Generated Date Plan:', response.data);
-    } catch (error) {
-      console.error('Error generating date plan:', error);
-      throw error;
-    }
-  },
+  dateHistories: [],
 
   getDatePlanByPartner: async (partnerId: string) => {
     try {
       const response = await axios.get(`http://localhost:3000/generate-date/${partnerId}`);
-      console.log('API Response:', response.data); // Debug log
-
-      if (!response.data) {
-        set({
-          datePlan: null,
-          activities: [],
-          dateHistories: []
-        });
-        return;
-      }
-
-      // Extract the dateHistory array from the response
-      const dateHistories = Array.isArray(response.data.dateHistory) 
-        ? response.data.dateHistory 
-        : [response.data.dateHistory].filter(Boolean);
-
-      set({ 
-        datePlan: response.data.datePlan,
+      console.log('Fetched dateHistories:', response.data.dateHistory); // Log the fetched date histories
+      set({
+        datePlans: response.data.datePlans,
         activities: response.data.activities,
-        dateHistories: dateHistories
+        dateHistories: response.data.dateHistory // Ensure this matches the backend response
       });
-
-      console.log('Set date histories:', dateHistories); // Debug log
-    } catch (error: any) {
-      if (error.response?.status === 404) {
-        set({
-          datePlan: null,
-          activities: [],
-          dateHistories: [],
-        });
-      } else {
-        console.error('Error fetching date plan:', error);
-        throw error;
-      }
+    } catch (error) {
+      console.error('Error fetching date plans:', error);
     }
   },
 
@@ -82,13 +41,14 @@ export const useDateStore = create<DateState>((set, get) => ({
         isFavourite: isFavorite
       });
       
-      // Update the favorite status in both datePlan and dateHistories
-      const { datePlan, dateHistories } = get();
+      const { datePlans, dateHistories } = get();
       
       set({
-        datePlan: datePlan?._id === dateId 
-          ? { ...datePlan, isFavourite: isFavorite }
-          : datePlan,
+        datePlans: datePlans.map(plan =>
+          plan._id === dateId 
+            ? { ...plan, isFavourite: isFavorite }
+            : plan
+        ),
         dateHistories: dateHistories.map(history =>
           history.id === dateId
             ? { ...history, isFavorite: isFavorite }

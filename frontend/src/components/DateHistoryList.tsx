@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import DateHistoryCard from "./DateHistoryCard";
-import { DateHistory } from "@/types/dateHistory";
+import { DateHistory } from "../store/types/date";
 import { colors, fontSize } from "@/constants/tokens";
 
 interface DateHistoryListProps {

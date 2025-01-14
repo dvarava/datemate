@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors, fontSize } from "@/constants/tokens";
-import { DateHistory } from "@/types/dateHistory";
+import { DateHistory } from "../store/types/date";
 import Avatar from "@/components/Avatar";
 import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import { useRouter } from "expo-router";

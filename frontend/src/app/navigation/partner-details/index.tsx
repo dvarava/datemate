@@ -52,8 +52,16 @@ const dietOptions = Object.keys(dietIcons);
 const PartnerDetailsScreen: React.FC = () => {
   const { partnerId } = useLocalSearchParams();
   const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
-  const { dateHistories, getDatePlanByPartner } = useDateStore();
+  const { datePlans, getDatePlanByPartner } = useDateStore();
   const partner = fetchPartnerById(partnerId as string);
+
+  useEffect(() => {
+    if (partnerId) {
+      getDatePlanByPartner(partnerId as string);
+      
+    }
+  }, [partnerId]);
+  
   useEffect(() => {
     if (partner) {
       console.log('Partner data:', partner);
@@ -267,6 +275,17 @@ const PartnerDetailsScreen: React.FC = () => {
     setAgeError("");
   };
 
+  // Map datePlans to DateHistory objects
+  const dateHistories = partner && datePlans ? datePlans.map((plan) => ({
+    id: plan._id,
+    name: partner.name,
+    age: partner.age.toString(),
+    dateDescription: `${plan.location} - ${plan.budget}€`,
+    date: plan.createdAt.toDateString(),
+    isFavorite: plan.isFavourite,
+    avatarGradient: ['someColor', 'anotherColor'], // Replace with actual gradient logic
+  })) : [];
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -453,7 +472,7 @@ const PartnerDetailsScreen: React.FC = () => {
 
         {/* Date History List */}
         <DateHistoryList
-          histories={histories}
+          histories={dateHistories}
           onActionPress={handleFavoriteToggle}
           showAvatar={false}
         />
