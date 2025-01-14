@@ -52,41 +52,53 @@ const dietOptions = Object.keys(dietIcons);
 const PartnerDetailsScreen: React.FC = () => {
   const { partnerId } = useLocalSearchParams();
   const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
-  const { datePlans, getDatePlanByPartner } = useDateStore();
+  const { getDatePlanByPartner, dateHistories } = useDateStore();
   const partner = fetchPartnerById(partnerId as string);
+
+  const [histories, setHistories] = useState<DateHistory[]>([]);
 
   useEffect(() => {
     if (partnerId) {
       getDatePlanByPartner(partnerId as string);
-      
     }
   }, [partnerId]);
-  
+
   useEffect(() => {
     if (partner) {
-      console.log('Partner data:', partner);
-      console.log('Dietary preferences:', partner.dietaryPreferences);
+      console.log("Partner data:", partner);
+      console.log("Dietary preferences:", partner.dietaryPreferences);
+      console.log("Date Histories:", dateHistories); // Log dateHistories
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
-      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
+      setPartnerPersonality(
+        partner.personalityType as "Introvert" | "Extrovert"
+      );
       setPartnerLoves(partner.interests);
       setSelectedDiet(partner.dietaryPreferences || []);
     }
-  }, [partner]);
+  }, [partner, dateHistories]);
 
-  useEffect(() => {
-    const loadDateHistory = async () => {
-      if (partnerId) {
-        try {
-          await getDatePlanByPartner(partnerId as string);
-        } catch (error) {
-          console.error('Error loading date history:', error);
-        }
-      }
-    };
+  // Format the date as "DD.MM.YYYY"
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split("-");
+    return `${day}.${month}.${year}`;
+  };
 
-    loadDateHistory();
-  }, [partnerId]);
+  // Transform datePlans to match DateHistoryCard's expected structure
+  const mappedDateHistories =
+    dateHistories && dateHistories.length > 0
+      ? dateHistories.map((history) => ({
+          id: history.id,
+          name: history.name,
+          age: history.age,
+          dateDescription: history.dateDescription,
+          date: formatDate(history.date), // Format as "DD.MM.YYYY"
+          isFavorite: history.isFavorite || false,
+          avatarGradient: history.avatarGradient || ["#ff0262", "#ffffff"],
+        }))
+      : [];
+
+  console.log("Mapped Date Histories:", mappedDateHistories); // Log transformed data
 
   const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
   const [partnerName, setPartnerName] = useState("");
@@ -106,12 +118,10 @@ const PartnerDetailsScreen: React.FC = () => {
 
   const router = useRouter();
 
-  const [histories, setHistories] = useState<DateHistory[]>([]);
-
   const handleFavoriteToggle = (id: string) => {
-    setHistories(prevHistories => 
+    setHistories((prevHistories) =>
       prevHistories.map((history: DateHistory) =>
-        history.id === id 
+        history.id === id
           ? { ...history, isFavorite: !history.isFavorite }
           : history
       )
@@ -165,16 +175,16 @@ const PartnerDetailsScreen: React.FC = () => {
       return;
     }
 
-      const updatedPartnerData = {
+    const updatedPartnerData = {
       name: partnerName,
       age: parseInt(partnerAge, 10),
       personalityType: partnerPersonality as "Introvert" | "Extrovert",
       interests: partnerLoves,
       dietaryPreferences: selectedDiet,
-  };
+    };
 
     try {
-      await editPartner(partnerId as string, updatedPartnerData); 
+      await editPartner(partnerId as string, updatedPartnerData);
       setIsEditing(false);
     } catch (error) {}
   };
@@ -274,17 +284,6 @@ const PartnerDetailsScreen: React.FC = () => {
     setIsAgeValid(true);
     setAgeError("");
   };
-
-  // Map datePlans to DateHistory objects
-  const dateHistories = partner && datePlans ? datePlans.map((plan) => ({
-    id: plan._id,
-    name: partner.name,
-    age: partner.age.toString(),
-    dateDescription: `${plan.location} - ${plan.budget}€`,
-    date: plan.createdAt.toDateString(),
-    isFavorite: plan.isFavourite,
-    avatarGradient: ['someColor', 'anotherColor'], // Replace with actual gradient logic
-  })) : [];
 
   return (
     <View style={styles.container}>
@@ -460,7 +459,9 @@ const PartnerDetailsScreen: React.FC = () => {
                       </View>
                     ))
                   ) : (
-                    <Text style={styles.description}>No dietary preferences set</Text>
+                    <Text style={styles.description}>
+                      No dietary preferences set
+                    </Text>
                   )}
                 </View>
               )}
@@ -472,7 +473,7 @@ const PartnerDetailsScreen: React.FC = () => {
 
         {/* Date History List */}
         <DateHistoryList
-          histories={dateHistories}
+          histories={mappedDateHistories}
           onActionPress={handleFavoriteToggle}
           showAvatar={false}
         />
@@ -735,7 +736,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.primary,
     textAlign: "center",
-    marginBottom: 20,
     fontFamily: "Nunito-Black",
   },
   modalContainer: {

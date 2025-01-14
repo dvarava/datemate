@@ -23,11 +23,19 @@ import { Activity } from "@/store/types/date";
 const DatePlanScreen: React.FC = () => {
   const router = useRouter();
   const { partnerId, showRegenerateButton } = useLocalSearchParams();
-  const { datePlan, activities, dateHistory, getDatePlanByPartner, setFavorite } = useDateStore();
+  const {
+    datePlan,
+    activities,
+    dateHistory,
+    getDatePlanByPartner,
+    setFavorite,
+  } = useDateStore();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null
+  );
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(Platform.OS === "ios");
 
@@ -36,10 +44,10 @@ const DatePlanScreen: React.FC = () => {
     if (partnerId) {
       getDatePlanByPartner(partnerId as string)
         .then(() => {
-          console.log('Fetched activities:', activities); // Debug log
+          console.log("Fetched activities:", activities); // Debug log
         })
-        .catch(error => {
-          console.error('Error:', error);
+        .catch((error) => {
+          console.error("Error:", error);
         });
     }
   }, [partnerId]);
@@ -71,74 +79,81 @@ const DatePlanScreen: React.FC = () => {
   };
 
   const renderPlanCards = () => {
-    return activities.slice(0, datePlan?.numberOfActivities).map((activity, index) => {
-      const isLeft = index % 2 === 0;
-      return (
-        <React.Fragment key={activity._id}>
-          <View
-            style={[
-              styles.planCard,
-              isLeft ? styles.leftCard : styles.rightCard,
-              (index === 2 || index === 4) && styles.alignedLeftCard,
-            ]}
-          >
+    return activities
+      .slice(0, datePlan?.numberOfActivities)
+      .map((activity, index) => {
+        const isLeft = index % 2 === 0;
+        return (
+          <React.Fragment key={activity._id}>
             <View
-              style={{
-                position: "absolute",
-                top: -20,
-                left: "50%",
-                transform: [{ translateX: -5 }],
-                zIndex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              style={[
+                styles.planCard,
+                isLeft ? styles.leftCard : styles.rightCard,
+                (index === 2 || index === 4) && styles.alignedLeftCard,
+              ]}
             >
-              <Heart size={40} />
-              <Text style={styles.heartText}>{index + 1}</Text>
-            </View>
+              <View
+                style={{
+                  position: "absolute",
+                  top: -20,
+                  left: "50%",
+                  transform: [{ translateX: -5 }],
+                  zIndex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Heart size={40} />
+                <Text style={styles.heartText}>{index + 1}</Text>
+              </View>
 
-            <Text style={styles.cardTitle}>{activity.name}</Text>
-            <View style={styles.cardDetailContainer}>
-              <Ionicons
-                name="storefront-outline"
-                size={10}
-                color={colors.background}
-                style={styles.locationIcon}
-              />
-              <Text style={styles.cardDetail}>{activity.location}</Text>
+              <Text style={styles.cardTitle}>{activity.name}</Text>
+              <View style={styles.cardDetailContainer}>
+                <Ionicons
+                  name="storefront-outline"
+                  size={10}
+                  color={colors.background}
+                  style={styles.locationIcon}
+                />
+                <Text style={styles.cardDetail}>{activity.location}</Text>
+              </View>
+              <View style={styles.cardDetailContainer}>
+                <Ionicons
+                  name="location-outline"
+                  size={10}
+                  color={colors.background}
+                  style={styles.locationIcon}
+                />
+                <Text style={styles.cardDetail}>{activity.address}</Text>
+              </View>
+              <SubscriptionGuard isPremium={false}>
+                <Text style={styles.cardDetail}>Cost: ${activity.cost}</Text>
+              </SubscriptionGuard>
+              <TouchableOpacity
+                onPress={() => handleInfoPress(index)}
+                style={styles.infoIcon}
+              >
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color={colors.background}
+                />
+              </TouchableOpacity>
             </View>
-            <View style={styles.cardDetailContainer}>
-              <Ionicons
-                name="location-outline"
-                size={10}
-                color={colors.background}
-                style={styles.locationIcon}
-              />
-              <Text style={styles.cardDetail}>{activity.address}</Text>
-            </View>
-            <SubscriptionGuard isPremium={false}>
-              <Text style={styles.cardDetail}>Cost: ${activity.cost}</Text>
-            </SubscriptionGuard>
-            <TouchableOpacity
-              onPress={() => handleInfoPress(index)}
-              style={styles.infoIcon}
-            >
-              <Ionicons
-                name="information-circle-outline"
-                size={20}
-                color={colors.background}
-              />
-            </TouchableOpacity>
-          </View>
-        </React.Fragment>
-      );
-    });
+          </React.Fragment>
+        );
+      });
   };
 
   // Add loading state
   if (!datePlan || !activities.length) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -150,7 +165,9 @@ const DatePlanScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.title}>
             Perfect Date Plan {"\n"}
-            <Text style={{ fontFamily: "Nunito-Regular" }}>You & {datePlan.partnerName}</Text>
+            <Text style={{ fontFamily: "Nunito-Regular" }}>
+              You & {datePlan.partnerName}
+            </Text>
           </Text>
           <View style={styles.datePlan}>{renderPlanCards()}</View>
 
@@ -158,7 +175,7 @@ const DatePlanScreen: React.FC = () => {
             {/* Replace hardcoded values with actual data */}
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Date mood:</Text>
-              <Text style={styles.detailValue}>{datePlan.mood.join(', ')}</Text>
+              <Text style={styles.detailValue}>{datePlan.mood.join(", ")}</Text>
             </View>
             {/* ... other details ... */}
           </View>
@@ -307,9 +324,7 @@ const DatePlanScreen: React.FC = () => {
               </TouchableOpacity>
               {selectedActivity && (
                 <>
-                  <Text style={styles.modalTitle}>
-                    {selectedActivity.name}
-                  </Text>
+                  <Text style={styles.modalTitle}>{selectedActivity.name}</Text>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalDetailTitle}>Location: </Text>
                     <Text style={styles.modalDetailText}>
