@@ -40,6 +40,9 @@ export class DatePlan {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop({ required: true })
+  shortDescription: string;
 }
 
 export const DatePlanSchema = SchemaFactory.createForClass(DatePlan);

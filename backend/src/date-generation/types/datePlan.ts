@@ -24,6 +24,8 @@ export interface DatePlanResponse {
     preferredPlace: string;
     isFavourite: boolean;
     createdAt: Date;
+    shortDescription: string;
+
   };
   activities: {
     _id: string;

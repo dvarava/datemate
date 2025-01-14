@@ -73,6 +73,11 @@ export class DateGenerationService {
       throw new NotFoundException(`Partner not found with id ${data.partnerId}`);
     }
 
+    const shortDescription = openAiResponse
+    .split('Brief date description:')[1]
+    ?.split('\n')[0]
+    ?.trim();
+
     const datePlan = new this.datePlanModel({
       partnerId: data.partnerId,
       partnerName: partner.name,
@@ -86,6 +91,7 @@ export class DateGenerationService {
       preferredPlace: data.preference,
       isFavourite: false,
       createdAt: new Date(),
+      shortDescription: shortDescription,
       __v: 0
     });
 
@@ -225,7 +231,7 @@ export class DateGenerationService {
           id: plan._id,
           name: plan.partnerName,
           age: partner.age.toString(),
-          dateDescription: planActivities[0]?.description || 'No description available',
+          dateDescription: plan.shortDescription || 'No description available', // Use shortDescription if available
           date: plan.createdAt.toISOString().split('T')[0],
           isFavorite: plan.isFavourite,
           avatarGradient: ["#ff0262", "#ffffff"]
@@ -239,7 +245,10 @@ export class DateGenerationService {
     );
   
     return {
-      datePlan: mostRecentPlan,
+      datePlan: {
+        ...mostRecentPlan.toObject(),
+        shortDescription: mostRecentPlan.shortDescription
+      },
       activities: currentActivities,
       dateHistory: dateHistories
     };

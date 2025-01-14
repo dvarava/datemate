@@ -33,4 +33,5 @@ export interface DateHistory {
   date: string;
   isFavorite: boolean;
   avatarGradient: string[];
+  shortDescription: string;
 }
