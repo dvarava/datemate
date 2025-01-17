@@ -7,6 +7,7 @@ import { colors, fontSize } from "@/constants/tokens";
 interface DateHistoryListProps {
   histories: DateHistory[];
   onActionPress: (id: string) => void;
+  onCardPress?: (id: string) => void;
   showAvatar?: boolean;
   showFavorite?: boolean;
 }
@@ -14,6 +15,7 @@ interface DateHistoryListProps {
 const DateHistoryList: React.FC<DateHistoryListProps> = ({
   histories,
   onActionPress,
+  onCardPress,
   showAvatar = true,
   showFavorite = true,
 }) => {
@@ -32,6 +34,7 @@ const DateHistoryList: React.FC<DateHistoryListProps> = ({
             key={history.id}
             history={history}
             onActionPress={onActionPress}
+            onCardPress={onCardPress}
             isPremium={isPremium}
             showAvatar={showAvatar}
             showFavorite={showFavorite}

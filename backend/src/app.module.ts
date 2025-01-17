@@ -6,7 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { PartnerModule } from './partner/partner.module';
-import { DateGenerationModule } from './date-generation/date-generation.module';
+import { DatePlanModule } from './date-plan/date-plan.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { DateGenerationModule } from './date-generation/date-generation.module';
     MongooseModule.forRoot(process.env.MONGODB_URI),
     UsersModule,
     PartnerModule,
-    DateGenerationModule,
+    DatePlanModule,
   ]
 })
 export class AppModule {}

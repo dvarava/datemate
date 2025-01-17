@@ -55,7 +55,7 @@ const GenerateDateScreen = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { generateDatePlan, partners, fetchPartners } = useDateStore();
+  const { createDatePlan, partners, fetchPartners } = useDateStore();
 
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -167,18 +167,18 @@ const GenerateDateScreen = () => {
       locationCoords,
       locationAddress:
         selectedLocation === "myLocation" ? currentLocationAddress : otherLocationAddress,
-      partnerId: partnerDetails._id // Change this line to use _id instead of partner object
+      partnerId: partnerDetails._id
     };
 
     setIsGenerating(true);
     try {
       console.log("Data being passed:", data);
-      await generateDatePlan(data);
+      await createDatePlan(data);
       setIsGenerating(false);
       router.push({
         pathname: "/navigation/date-plan",
         params: {
-          partnerId: partnerDetails._id // Update params to use _id
+          partnerId: partnerDetails._id, showRegenerateButton: "true"
         }
       });
     } catch (error) {

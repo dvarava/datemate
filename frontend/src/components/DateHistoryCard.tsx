@@ -7,15 +7,19 @@ import Avatar from "@/components/Avatar";
 import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import { useRouter } from "expo-router";
 
-const DateHistoryCard: React.FC<{
+interface DateHistoryCardProps {
   history: DateHistory;
   onActionPress: (id: string) => void;
+  onCardPress?: (id: string) => void; // Add onCardPress prop
   isPremium: boolean;
   showAvatar?: boolean;
   showFavorite?: boolean;
-}> = ({
+}
+
+const DateHistoryCard: React.FC<DateHistoryCardProps> = ({
   history,
   onActionPress,
+  onCardPress,
   isPremium,
   showAvatar = true,
   showFavorite = true,
@@ -23,16 +27,21 @@ const DateHistoryCard: React.FC<{
   const router = useRouter();
 
   const handlePress = () => {
-    router.push({
-      pathname: "/navigation/date-plan",
-      params: {
-        name: history.name,
-        age: history.age,
-        description: history.dateDescription,
-        date: history.date,
-        showRegenerateButton: "false",
-      },
-    });
+    if (onCardPress) {
+      onCardPress(history.id); // Trigger onCardPress if provided
+    } else {
+      // Fallback navigation logic (optional)
+      router.push({
+        pathname: "/navigation/date-plan",
+        params: {
+          name: history.name,
+          age: history.age,
+          description: history.dateDescription,
+          date: history.date,
+          showRegenerateButton: "false",
+        },
+      });
+    }
   };
 
   return (

@@ -22,7 +22,6 @@ export interface DatePlan {
     preferredPlace: string;
     isFavourite: boolean;
     createdAt: Date;
-    totalCost: number;
   }
 
 export interface DateHistory {

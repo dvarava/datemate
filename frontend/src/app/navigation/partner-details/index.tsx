@@ -52,14 +52,14 @@ const dietOptions = Object.keys(dietIcons);
 const PartnerDetailsScreen: React.FC = () => {
   const { partnerId } = useLocalSearchParams();
   const { fetchPartnerById, editPartner, deletePartner } = usePartnerStore();
-  const { getDatePlanByPartner, dateHistories } = useDateStore();
+  const { fetchDatePlansByPartnerId, dateHistories } = useDateStore();
   const partner = fetchPartnerById(partnerId as string);
 
   const [histories, setHistories] = useState<DateHistory[]>([]);
 
   useEffect(() => {
     if (partnerId) {
-      getDatePlanByPartner(partnerId as string);
+      fetchDatePlansByPartnerId(partnerId as string);
     }
   }, [partnerId]);
 
@@ -67,12 +67,10 @@ const PartnerDetailsScreen: React.FC = () => {
     if (partner) {
       console.log("Partner data:", partner);
       console.log("Dietary preferences:", partner.dietaryPreferences);
-      console.log("Date Histories:", dateHistories); // Log dateHistories
+      console.log("Date Histories:", dateHistories);
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
-      setPartnerPersonality(
-        partner.personalityType as "Introvert" | "Extrovert"
-      );
+      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
       setPartnerLoves(partner.interests);
       setSelectedDiet(partner.dietaryPreferences || []);
     }
@@ -92,13 +90,11 @@ const PartnerDetailsScreen: React.FC = () => {
           name: history.name,
           age: history.age,
           dateDescription: history.dateDescription,
-          date: formatDate(history.date), // Format as "DD.MM.YYYY"
+          date: formatDate(history.date),
           isFavorite: history.isFavorite || false,
           avatarGradient: history.avatarGradient || ["#ff0262", "#ffffff"],
         }))
       : [];
-
-  console.log("Mapped Date Histories:", mappedDateHistories); // Log transformed data
 
   const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
   const [partnerName, setPartnerName] = useState("");
@@ -283,6 +279,13 @@ const PartnerDetailsScreen: React.FC = () => {
 
     setIsAgeValid(true);
     setAgeError("");
+  };
+
+  const handleDateCardPress = (datePlanId: string) => {
+    router.push({
+      pathname: "/navigation/date-plan",
+      params: { datePlanId, showRegenerateButton: "false" },
+    });
   };
 
   return (
@@ -475,6 +478,7 @@ const PartnerDetailsScreen: React.FC = () => {
         <DateHistoryList
           histories={mappedDateHistories}
           onActionPress={handleFavoriteToggle}
+          onCardPress={handleDateCardPress}
           showAvatar={false}
         />
 

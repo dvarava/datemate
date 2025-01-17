@@ -8,6 +8,7 @@ import {
   Modal,
   Platform,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { colors, fontSize } from "@/constants/tokens";
 import { useRouter } from "expo-router";
@@ -22,13 +23,13 @@ import { Activity } from "@/store/types/date";
 
 const DatePlanScreen: React.FC = () => {
   const router = useRouter();
-  const { partnerId, showRegenerateButton } = useLocalSearchParams();
+  const { datePlanId, showRegenerateButton } = useLocalSearchParams();
   const {
-    datePlan,
+    datePlans,
     activities,
-    dateHistory,
-    getDatePlanByPartner,
+    fetchDatePlanById,
     setFavorite,
+    createDatePlan,
   } = useDateStore();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,23 +39,24 @@ const DatePlanScreen: React.FC = () => {
   );
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(Platform.OS === "ios");
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
-  // Fetch date plan data when component mounts
+  const isPremium = false;
+
   useEffect(() => {
-    if (partnerId) {
-      getDatePlanByPartner(partnerId as string)
-        .then(() => {
-          console.log("Fetched activities:", activities); // Debug log
-        })
-        .catch((error) => {
+    if (datePlanId) {
+      fetchDatePlanById(datePlanId as string)
+        .then(() => {})
+        .catch((error: any) => {
           console.error("Error:", error);
         });
     }
-  }, [partnerId]);
+  }, [datePlanId]);
 
   const handleAddToFavourites = async () => {
-    if (datePlan) {
-      await setFavorite(!datePlan.isFavourite);
+    if (datePlans.length > 0) {
+      const datePlan = datePlans[0];
+      await setFavorite(datePlan._id, !datePlan.isFavourite);
     }
   };
 
@@ -78,9 +80,40 @@ const DatePlanScreen: React.FC = () => {
     setModalVisible(true);
   };
 
+  const regenerateDatePlan = async () => {
+    if (datePlans.length === 0) return;
+
+    const datePlan = datePlans[0];
+    setIsRegenerating(true);
+
+    try {
+      const data = {
+        partnerId: datePlan.partnerId,
+        activityAmount: datePlan.numberOfActivities,
+        budget: datePlan.budget,
+        moodSelection: datePlan.mood,
+        adjustToWeather: datePlan.adjustToWeather,
+        selectedTime: datePlan.dayTime,
+        duration: datePlan.duration,
+        preference: datePlan.preferredPlace,
+        locationAddress: datePlan.location,
+      };
+
+      await createDatePlan(data);
+    } catch (error) {
+      console.error("Error regenerating date plan:", error);
+      Alert.alert("Error", "Failed to regenerate date plan.");
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   const renderPlanCards = () => {
+    if (datePlans.length === 0 || activities.length === 0) return null;
+
+    const datePlan = datePlans[0];
     return activities
-      .slice(0, datePlan?.numberOfActivities)
+      .slice(0, datePlan.numberOfActivities)
       .map((activity, index) => {
         const isLeft = index % 2 === 0;
         return (
@@ -126,8 +159,23 @@ const DatePlanScreen: React.FC = () => {
                 />
                 <Text style={styles.cardDetail}>{activity.address}</Text>
               </View>
-              <SubscriptionGuard isPremium={false}>
-                <Text style={styles.cardDetail}>Cost: ${activity.cost}</Text>
+              <SubscriptionGuard
+                isPremium={isPremium}
+                lockedText="Cost: "
+                textStyle={{ fontSize: fontSize.xs, fontWeight: "bold" }}
+                iconSize={14}
+                lockedTextMarginRight={0}
+              >
+                <View style={styles.cardDetailContainer}>
+                  <Ionicons
+                    name="wallet-outline"
+                    size={10}
+                    color={colors.background}
+                    style={styles.locationIcon}
+                  />
+                  {/* change use location currency */}
+                  <Text style={styles.cardDetail}>${activity.cost}</Text>
+                </View>
               </SubscriptionGuard>
               <TouchableOpacity
                 onPress={() => handleInfoPress(index)}
@@ -145,8 +193,7 @@ const DatePlanScreen: React.FC = () => {
       });
   };
 
-  // Add loading state
-  if (!datePlan || !activities.length) {
+  if (datePlans.length === 0 || activities.length === 0) {
     return (
       <View
         style={[
@@ -158,6 +205,8 @@ const DatePlanScreen: React.FC = () => {
       </View>
     );
   }
+
+  const datePlan = datePlans[0];
 
   return (
     <View style={styles.container}>
@@ -172,12 +221,79 @@ const DatePlanScreen: React.FC = () => {
           <View style={styles.datePlan}>{renderPlanCards()}</View>
 
           <View style={styles.detailsContainer}>
-            {/* Replace hardcoded values with actual data */}
+            {/* Date Mood */}
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Date mood:</Text>
-              <Text style={styles.detailValue}>{datePlan.mood.join(", ")}</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  {datePlan.mood.join(", ")}
+                </Text>
+              </SubscriptionGuard>
             </View>
-            {/* ... other details ... */}
+
+            {/* Adjust to Weather */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Adjust to weather:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  {datePlan.adjustToWeather ? "Yes" : "No"}
+                </Text>
+              </SubscriptionGuard>
+            </View>
+
+            {/* Time of the Day */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Time of the day:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  {datePlan.dayTime.charAt(0).toUpperCase() +
+                    datePlan.dayTime.slice(1)}
+                </Text>
+              </SubscriptionGuard>
+            </View>
+
+            {/* Date Duration */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Date duration:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  {datePlan.duration} minutes
+                </Text>
+              </SubscriptionGuard>
+            </View>
+
+            {/* Area Preference */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Area preference:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  {datePlan.preferredPlace.charAt(0).toUpperCase() +
+                    datePlan.preferredPlace.slice(1)}
+                </Text>
+              </SubscriptionGuard>
+            </View>
+
+            {/* Initial Budget */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Initial budget:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>${datePlan.budget}</Text>
+              </SubscriptionGuard>
+            </View>
+
+            {/* Total Cost */}
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Total cost:</Text>
+              <SubscriptionGuard isPremium={isPremium}>
+                <Text style={styles.detailValue}>
+                  $
+                  {activities.reduce(
+                    (total, activity) => total + activity.cost,
+                    0
+                  )}
+                </Text>
+              </SubscriptionGuard>
+            </View>
           </View>
 
           <View
@@ -217,8 +333,9 @@ const DatePlanScreen: React.FC = () => {
 
             {showRegenerateButton === "true" && (
               <TouchableOpacity
-                onPress={handleRegenerate}
+                onPress={regenerateDatePlan}
                 style={styles.bottomButton}
+                disabled={isRegenerating}
               >
                 <LinearGradient
                   colors={[colors.secondary, colors.primary]}
@@ -226,11 +343,15 @@ const DatePlanScreen: React.FC = () => {
                   end={{ x: 1, y: 1.5 }}
                   style={styles.regenerateButton}
                 >
-                  <Ionicons
-                    name="refresh-outline"
-                    size={28}
-                    color={colors.primary}
-                  />
+                  {isRegenerating ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Ionicons
+                      name="refresh-outline"
+                      size={28}
+                      color={colors.primary}
+                    />
+                  )}
                 </LinearGradient>
               </TouchableOpacity>
             )}
@@ -339,7 +460,7 @@ const DatePlanScreen: React.FC = () => {
                   </View>
                   <View style={styles.modalDetailRow}>
                     <SubscriptionGuard
-                      isPremium={false}
+                      isPremium={isPremium}
                       lockedText="Cost: "
                       textStyle={{ fontSize: fontSize.md, fontWeight: "bold" }}
                       iconSize={18}
@@ -347,6 +468,7 @@ const DatePlanScreen: React.FC = () => {
                     >
                       <Text style={styles.modalDetailTitle}>Cost: </Text>
                       <Text style={styles.modalDetailText}>
+                        {/* change use location currency */}$
                         {selectedActivity.cost}
                       </Text>
                     </SubscriptionGuard>
