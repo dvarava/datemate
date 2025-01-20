@@ -250,9 +250,10 @@ export class DatePlanService {
   }
 
   async getDatePlansByPartnerId(partnerId: string) {
+    const partnerObjectId = new Types.ObjectId(partnerId);
     // Get all date plans for the partner, sorted by creation date
     const datePlans = await this.datePlanModel
-      .find({ partnerId })
+      .find({ partnerId: partnerObjectId })
       .sort({ createdAt: -1 })
       .exec();
 
@@ -263,7 +264,7 @@ export class DatePlanService {
     }
 
     // Fetch the partner details
-    const partner = await this.partnerModel.findById(partnerId);
+    const partner = await this.partnerModel.findById(partnerObjectId);
     if (!partner) {
       throw new NotFoundException(`Partner not found with id ${partnerId}`);
     }
@@ -335,7 +336,7 @@ export class DatePlanService {
       );
 
       const datePlans = await this.datePlanModel
-        .find({ partnerId: { $in: partnerIds } })
+        .find({ partnerId: { $in: partnerIds.map(id => new Types.ObjectId(id.toString())) } })
         .sort({ createdAt: -1 })
         .exec();
       console.log("Found date plans:", datePlans);
