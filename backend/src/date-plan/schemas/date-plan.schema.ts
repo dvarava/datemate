@@ -4,7 +4,9 @@ import { Document, Types } from 'mongoose';
 export type DatePlanDocument = DatePlan & Document;
 
 @Schema()
+
 export class DatePlan {
+
   @Prop({ type: Types.ObjectId, required: true, ref: 'Partner' })
   partnerId: Types.ObjectId;
 

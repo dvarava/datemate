@@ -93,7 +93,7 @@ export class DatePlanService {
     );
 
     const datePlan = new this.datePlanModel({
-      partnerId: data.partnerId,
+      partnerId: new Types.ObjectId(data.partnerId),
       partnerName: partner.name,
       numberOfActivities: data.activityAmount,
       location: data.locationAddress,
