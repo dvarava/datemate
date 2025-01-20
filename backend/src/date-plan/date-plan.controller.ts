@@ -6,6 +6,7 @@ import {
   Param,
   NotFoundException,
   UseGuards,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { DatePlanService } from "./date-plan.service";
 import { DatePlanInput } from "./types/datePlan";
@@ -24,7 +25,10 @@ export class DatePlanController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAllDatePlans(@CurrentUser() user) {
-    console.log("Current User:", user);
+    console.log("DatePlanController - Received User:", user);
+    if (!user || !user.userId) {
+      throw new UnauthorizedException("User not properly authenticated");
+    }
     return await this.datePlanService.getAllDatePlans(user.userId);
   }
 

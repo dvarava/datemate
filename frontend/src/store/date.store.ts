@@ -74,20 +74,29 @@ export const useDateStore = create<DateState>((set, get) => ({
   fetchAllDatePlans: async () => {
     try {
       const token = await SecureStore.getItemAsync("token");
-      const userId = await SecureStore.getItemAsync("userId");
-      console.log("Fetching plans with token:", token, "userId:", userId);
-
+      console.log('Stored token:', token);
+      
+      // Decode and log the token content (for debugging only)
+      if (token) {
+        const tokenParts = token.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        console.log('Decoded token payload:', payload);
+      }
+  
       const response = await axios.get("http://localhost:3000/date-plans", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("API Response:", response.data);
-
-      set({ dateHistories: response.data.datePlans || [] });
-      console.log("Updated store state:", get().dateHistories);
+      
+      console.log('Response:', response.data);
+      set({ dateHistories: response.data || [] });
     } catch (error) {
       console.error("Error fetching all date plans:", error);
+      if (axios.isAxiosError(error)) {
+        console.log('Response data:', error.response?.data);
+        console.log('Response status:', error.response?.status);
+      }
       Alert.alert("Error", "Failed to fetch date plans. Please try again.");
     }
   },
