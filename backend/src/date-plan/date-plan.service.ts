@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { firstValueFrom } from "rxjs";
 import { AxiosResponse } from "axios";
 import { DatePlanInput } from "./types/datePlan";
@@ -292,57 +292,67 @@ export class DatePlanService {
 
   async getAllDatePlans(userId: string) {
     try {
-      const datePlans = await this.datePlanModel
-        .find({ userId }) // Filter by userId
-        .sort({ createdAt: -1 })
-        .exec();
+      console.log("Getting plans for userId:", userId);
 
-      if (!datePlans || datePlans.length === 0) {
-        throw new NotFoundException("No date plans found for this user");
+      const userPartners = await this.partnerModel
+        .find({ userId: new Types.ObjectId(userId) })
+        .exec();
+      console.log("Found partners:", userPartners);
+
+      if (!userPartners || userPartners.length === 0) {
+        console.log("No partners found for user");
+        return [];
       }
 
-      // Get activities for user's date plans
+      const partnerIds = userPartners.map((partner) => partner._id);
+      console.log("Partner IDs:", partnerIds);
+
+      const datePlans = await this.datePlanModel
+        .find({ partnerId: { $in: partnerIds } })
+        .sort({ createdAt: -1 })
+        .exec();
+      console.log("Found date plans:", datePlans);
+
+      if (!datePlans || datePlans.length === 0) {
+        console.log("No date plans found for partners");
+        return [];
+      }
+
       const allActivities = await this.activityModel
         .find({
           datePlanId: { $in: datePlans.map((plan) => plan._id) },
         })
         .exec();
+      console.log("Found activities:", allActivities);
 
-      // Get all partner details for user's date plans
-      const partnerIds = datePlans
-        .map((plan) => plan.partnerId)
-        .filter((id) => id);
-      const partners = await this.partnerModel
-        .find({
-          _id: { $in: partnerIds },
-        })
-        .exec();
+      const partnersMap = new Map(
+        userPartners.map((partner) => [partner._id.toString(), partner])
+      );
 
       const dateHistories = datePlans.map((plan) => {
         const planActivities = allActivities.filter(
           (activity) => activity.datePlanId?.toString() === plan._id?.toString()
         );
+        const partner = partnersMap.get(plan.partnerId.toString());
 
-        const partner = partners.find(
-          (p) => p._id?.toString() === plan.partnerId?.toString()
-        );
-
-        return {
+        const history = {
           id: plan._id,
-          name: plan.partnerName || "Unknown",
+          name: plan.partnerName,
           age: partner?.age?.toString() || "N/A",
           dateDescription:
             planActivities[0]?.description || "No description available",
           date: plan.createdAt?.toISOString().split("T")[0] || "N/A",
           isFavorite: plan.isFavourite || false,
+          partnerId: plan.partnerId,
         };
+        console.log("Created history object:", history);
+        return history;
       });
 
+      console.log("Returning date histories:", dateHistories);
       return dateHistories;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
+      console.error("Error in getAllDatePlans:", error);
       throw new Error(`Failed to get date plans: ${error.message}`);
     }
   }
@@ -354,11 +364,10 @@ export class DatePlanService {
         throw new NotFoundException(`Date plan not found with id ${id}`);
       }
 
-      // Update only the isFavourite field
       const updatedDatePlan = await this.datePlanModel.findByIdAndUpdate(
         id,
         { $set: { isFavourite: !datePlan.isFavourite } },
-        { new: true, runValidators: false } // Return updated document and skip validation
+        { new: true, runValidators: false }
       );
 
       if (!updatedDatePlan) {

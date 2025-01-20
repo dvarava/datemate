@@ -1,6 +1,12 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, Image, Platform } from "react-native";
-import { useAuthStore } from "@/store/authStore";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
+import { useAuthStore } from "@/store/auth.store";
 import { colors } from "@/constants/tokens";
 
 const LoginWithApple = () => {

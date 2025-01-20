@@ -18,7 +18,7 @@ import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams } from "expo-router";
 import Heart from "@/svg/heart";
-import { useDateStore } from "@/store/dateStore";
+import { useDateStore } from "@/store/date.store";
 import { Activity } from "@/store/types/date";
 
 const DatePlanScreen: React.FC = () => {

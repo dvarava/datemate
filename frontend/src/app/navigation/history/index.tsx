@@ -1,61 +1,82 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import DateHistoryList from "@/components/DateHistoryList";
 import { colors, fontSize } from "@/constants/tokens";
-import { DateHistory } from "@/types/dateHistory";
+import { useDateStore } from "@/store/date.store";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HistoryScreen: React.FC = () => {
-  // harcoded data
-  const [histories, setHistories] = useState<DateHistory[]>([
-    {
-      id: "1",
-      name: "Anna",
-      age: "21",
-      dateDescription: "Chill date under the sun",
-      date: "14.09.2024",
-      avatarGradient: ["#ff0262", "#fff"],
-      isFavorite: true,
-    },
-    {
-      id: "2",
-      name: "Diana",
-      age: "23",
-      dateDescription: "Romantic evening sunset date",
-      date: "01.06.2024",
-      avatarGradient: ["#d244ac", "#ffffff"],
-      isFavorite: false,
-    },
-    {
-      id: "3",
-      name: "Tamara",
-      age: "48",
-      dateDescription: "Exciting outdoors hike date",
-      date: "12.08.2024",
-      avatarGradient: ["#4469d2", "#fff"],
-      isFavorite: false,
-    },
-  ]);
+  const { dateHistories, fetchAllDatePlans, setFavorite } = useDateStore();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // add to favorites in DB here
-  const handleFavoriteToggle = (id: string) => {
-    setHistories((prevHistories) =>
-      prevHistories.map((history) =>
-        history.id === id
-          ? { ...history, isFavorite: !history.isFavorite }
-          : history
-      )
-    );
+  // Fetch data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadDatePlans = async () => {
+        try {
+          setIsLoading(true);
+          setError(null);
+          await fetchAllDatePlans();
+        } catch (err) {
+          setError("Failed to load date plans");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      loadDatePlans();
+    }, [fetchAllDatePlans])
+  );
+
+  const handleFavoriteToggle = async (id: string) => {
+    try {
+      const dateHistory = dateHistories.find((history) => history.id === id);
+      if (dateHistory) {
+        await setFavorite(id, !dateHistory.isFavorite);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      Alert.alert("Error", "Failed to update favorite status");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <Text style={styles.header}>Generated Dates History</Text>
-        <DateHistoryList
-          histories={histories}
-          onActionPress={handleFavoriteToggle}
-          showFavorite={true}
-        />
+        {dateHistories.length === 0 ? (
+          <Text style={styles.noDataText}>No date plans yet</Text>
+        ) : (
+          <DateHistoryList
+            histories={dateHistories}
+            onActionPress={handleFavoriteToggle}
+            showFavorite={true}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -78,6 +99,22 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     fontFamily: "Nunito-Black",
+  },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: fontSize.md,
+    textAlign: "center",
+  },
+  noDataText: {
+    textAlign: "center",
+    color: colors.primary,
+    fontSize: fontSize.md,
+    marginTop: 20,
+    fontFamily: "Nunito-Regular",
   },
 });
 

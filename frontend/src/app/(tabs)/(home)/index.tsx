@@ -18,7 +18,7 @@ import SubscriptionGuard from "@/guards/SubscriptionGuard";
 import HomeCalendar from "@/components/HomeCalendar";
 import * as Notifications from "expo-notifications";
 import RobotSvg from "@/svg/robot";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/auth.store";
 
 interface HolidayInfo {
   name: string;
@@ -51,25 +51,70 @@ const calculateDaysUntilDate = (targetDate: Date): number => {
 // Predefined Holidays
 const holidays = [
   { name: "Commitment Day", date: new Date(new Date().getFullYear(), 0, 1) },
-  { name: "National Cuddling Day", date: new Date(new Date().getFullYear(), 0, 6) },
-  { name: "National Hugging Day", date: new Date(new Date().getFullYear(), 0, 21) },
+  {
+    name: "National Cuddling Day",
+    date: new Date(new Date().getFullYear(), 0, 6),
+  },
+  {
+    name: "National Hugging Day",
+    date: new Date(new Date().getFullYear(), 0, 21),
+  },
   { name: "Hug Day", date: new Date(new Date().getFullYear(), 1, 12) },
   { name: "Kiss Day", date: new Date(new Date().getFullYear(), 1, 13) },
   { name: "Valentine’s Day", date: new Date(new Date().getFullYear(), 1, 14) },
-  { name: "World Compliment Day", date: new Date(new Date().getFullYear(), 2, 1) },
-  { name: "National Lover’s Day", date: new Date(new Date().getFullYear(), 3, 23) },
-  { name: "Couple Appreciation Day", date: new Date(new Date().getFullYear(), 4, 1) },
-  { name: "National Loving Day", date: new Date(new Date().getFullYear(), 5, 12) }, 
-  { name: "National Kissing Day", date: new Date(new Date().getFullYear(), 5, 22) },
+  {
+    name: "World Compliment Day",
+    date: new Date(new Date().getFullYear(), 2, 1),
+  },
+  {
+    name: "National Lover’s Day",
+    date: new Date(new Date().getFullYear(), 3, 23),
+  },
+  {
+    name: "Couple Appreciation Day",
+    date: new Date(new Date().getFullYear(), 4, 1),
+  },
+  {
+    name: "National Loving Day",
+    date: new Date(new Date().getFullYear(), 5, 12),
+  },
+  {
+    name: "National Kissing Day",
+    date: new Date(new Date().getFullYear(), 5, 22),
+  },
   { name: "Hug Holiday", date: new Date(new Date().getFullYear(), 5, 29) },
-  { name: "International Kissing Day", date: new Date(new Date().getFullYear(), 6, 6) },
-  { name: "National Girlfriend Day", date: new Date(new Date().getFullYear(), 7, 1) },
-  { name: "National Hand Holding Day", date: new Date(new Date().getFullYear(), 7, 9) },
-  { name: "Kiss and Make Up Day", date: new Date(new Date().getFullYear(), 7, 25) },
-  { name: "National Feel The Love Day", date: new Date(new Date().getFullYear(), 8, 7) },
-  { name: "National Boyfriend Day", date: new Date(new Date().getFullYear(), 9, 3) },
-  { name: "National I Love You Day", date: new Date(new Date().getFullYear(), 9, 14) },
-  { name: "National Make a Gift Day", date: new Date(new Date().getFullYear(), 11, 3) },
+  {
+    name: "International Kissing Day",
+    date: new Date(new Date().getFullYear(), 6, 6),
+  },
+  {
+    name: "National Girlfriend Day",
+    date: new Date(new Date().getFullYear(), 7, 1),
+  },
+  {
+    name: "National Hand Holding Day",
+    date: new Date(new Date().getFullYear(), 7, 9),
+  },
+  {
+    name: "Kiss and Make Up Day",
+    date: new Date(new Date().getFullYear(), 7, 25),
+  },
+  {
+    name: "National Feel The Love Day",
+    date: new Date(new Date().getFullYear(), 8, 7),
+  },
+  {
+    name: "National Boyfriend Day",
+    date: new Date(new Date().getFullYear(), 9, 3),
+  },
+  {
+    name: "National I Love You Day",
+    date: new Date(new Date().getFullYear(), 9, 14),
+  },
+  {
+    name: "National Make a Gift Day",
+    date: new Date(new Date().getFullYear(), 11, 3),
+  },
 ];
 
 // Hardcoded special dates
@@ -83,12 +128,13 @@ const todayMidnight = new Date();
 todayMidnight.setHours(0, 0, 0, 0);
 const todayMidnightTime = todayMidnight.getTime();
 
-const combinedSpecialDates = [
-  ...holidays,
-  ...dbSpecialDatesHardcoded,
-].filter((item) => item.date.getTime() >= todayMidnightTime);
+const combinedSpecialDates = [...holidays, ...dbSpecialDatesHardcoded].filter(
+  (item) => item.date.getTime() >= todayMidnightTime
+);
 
-const getNearestDate = (allDates: { name: string; date: Date }[]): HolidayInfo => {
+const getNearestDate = (
+  allDates: { name: string; date: Date }[]
+): HolidayInfo => {
   let nearest: HolidayInfo = { name: "", daysLeft: Infinity };
 
   allDates.forEach((item) => {
@@ -218,7 +264,11 @@ const HomeScreen = () => {
   const getTodayConversationStarter = () => {
     const today = new Date();
     const dayOfYear = Math.floor(
-      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24
+      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) /
+        1000 /
+        60 /
+        60 /
+        24
     );
     const index = dayOfYear % conversationStarters.length;
     return conversationStarters[index];
@@ -266,7 +316,9 @@ const HomeScreen = () => {
     <ScrollView style={styles.container}>
       {/* Calendar Component */}
       <View style={styles.calendarWrapper}>
-        <HomeCalendar specialDates={combinedSpecialDates.map(item => item.date)} />
+        <HomeCalendar
+          specialDates={combinedSpecialDates.map((item) => item.date)}
+        />
         {/* 
           Replace the hardcoded dbSpecialDatesHardcoded with actual data fetched from MongoDB.
           For example, using Zustand:
@@ -353,7 +405,8 @@ const HomeScreen = () => {
                     {displayDaysLeft(nearestUpcomingDate.daysLeft)}
                   </Text>
                   <Text style={styles.untilText}>
-                    {displayVerb(nearestUpcomingDate.daysLeft)} "{nearestUpcomingDate.name}"!
+                    {displayVerb(nearestUpcomingDate.daysLeft)} "
+                    {nearestUpcomingDate.name}"!
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -372,7 +425,9 @@ const HomeScreen = () => {
                     {isNotified ? "Reminder On" : "Notify Me"}
                   </Text>
                   <Ionicons
-                    name={isNotified ? "notifications" : "notifications-outline"}
+                    name={
+                      isNotified ? "notifications" : "notifications-outline"
+                    }
                     size={16}
                     style={[
                       styles.notifyIcon,
@@ -391,9 +446,7 @@ const HomeScreen = () => {
         <Text style={styles.conversationStarterTitle}>
           DAILY CONVERSATION STARTER:
         </Text>
-        <Text style={styles.conversationStarterText}>
-          {currentStarter}
-        </Text>
+        <Text style={styles.conversationStarterText}>{currentStarter}</Text>
       </View>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Button
@@ -483,7 +536,7 @@ const styles = StyleSheet.create({
   upcomingCardContent: {
     flex: 1,
     justifyContent: "space-between",
-    height: '100%',
+    height: "100%",
   },
   upcomingText: {
     color: colors.primary,

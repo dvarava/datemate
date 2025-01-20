@@ -5,9 +5,12 @@ import {
   Get,
   Param,
   NotFoundException,
+  UseGuards,
 } from "@nestjs/common";
 import { DatePlanService } from "./date-plan.service";
 import { DatePlanInput } from "./types/datePlan";
+import { CurrentUser } from "src/auth/decorators/current-user.decorator";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @Controller("date-plans")
 export class DatePlanController {
@@ -18,20 +21,12 @@ export class DatePlanController {
     return await this.datePlanService.createDatePlan(data);
   }
 
-  // @Get()
-  // @UseGuards(AuthGuard) // Assuming you have an auth guard
-  // async getAllDatePlans(@Request() req) {
-  //   try {
-  //     const userId = req.user.id; // Get userId from the authenticated request
-  //     const datePlans = await this.datePlanService.getAllDatePlans(userId);
-  //     return { datePlans };
-  //   } catch (error) {
-  //     if (error instanceof NotFoundException) {
-  //       throw new NotFoundException(error.message);
-  //     }
-  //     throw error;
-  //   }
-  // }
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getAllDatePlans(@CurrentUser() user) {
+    console.log("Current User:", user);
+    return await this.datePlanService.getAllDatePlans(user.userId);
+  }
 
   @Post(":id/toggle-favorite")
   async toggleFavorite(@Param("id") id: string) {

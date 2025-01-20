@@ -22,8 +22,8 @@ import PartnersList from "@/components/PartnersList";
 import Avatar from "@/components/Avatar";
 import CustomSlider from "@/components/CustomSlider";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { useDateStore } from "@/store/dateStore";
-import { Partner } from '../../../store/types/partner';
+import { useDateStore } from "@/store/date.store";
+import { Partner } from "../../../store/types/partner";
 
 const GenerateDateScreen = () => {
   const router = useRouter();
@@ -68,7 +68,6 @@ const GenerateDateScreen = () => {
     };
     loadPartners();
   }, []);
-  
 
   useFocusEffect(
     useCallback(() => {
@@ -154,7 +153,6 @@ const GenerateDateScreen = () => {
       return;
     }
 
-
     const data = {
       activityAmount,
       budget,
@@ -166,8 +164,10 @@ const GenerateDateScreen = () => {
       selectedLocation,
       locationCoords,
       locationAddress:
-        selectedLocation === "myLocation" ? currentLocationAddress : otherLocationAddress,
-      partnerId: partnerDetails._id
+        selectedLocation === "myLocation"
+          ? currentLocationAddress
+          : otherLocationAddress,
+      partnerId: partnerDetails._id,
     };
 
     setIsGenerating(true);
@@ -178,8 +178,9 @@ const GenerateDateScreen = () => {
       router.push({
         pathname: "/navigation/date-plan",
         params: {
-          partnerId: partnerDetails._id, showRegenerateButton: "true"
-        }
+          partnerId: partnerDetails._id,
+          showRegenerateButton: "true",
+        },
       });
     } catch (error) {
       setIsGenerating(false);
@@ -228,12 +229,12 @@ const GenerateDateScreen = () => {
   };
 
   // Map partners to profiles format
-  const partnerProfiles = partners.map(partner => ({
+  const partnerProfiles = partners.map((partner) => ({
     id: partner._id,
     name: partner.name,
     age: partner.age,
     gender: partner.gender,
-    avatarGradient: partner.avatarGradient || ['#4469d2', '#fff'],
+    avatarGradient: partner.avatarGradient || ["#4469d2", "#fff"],
   }));
 
   return (

@@ -10,6 +10,7 @@ interface DateState {
   activities: Activity[];
   partners: Partner[];
   dateHistories: DateHistory[];
+  fetchAllDatePlans: () => Promise<void>;
   fetchDatePlansByPartnerId: (partnerId: string) => Promise<void>;
   fetchDatePlanById: (datePlanId: string) => Promise<void>;
   fetchPartners: () => Promise<void>;
@@ -23,16 +24,28 @@ export const useDateStore = create<DateState>((set, get) => ({
   partners: [],
   dateHistories: [],
 
-  // Fetch date plans by partner ID
   fetchDatePlansByPartnerId: async (partnerId: string) => {
     try {
       const response = await axios.get(
         `http://localhost:3000/date-plans/partners/${partnerId}`
       );
+
+      // Check if the response has data but no date plans
+      if (response.data && !response.data.datePlans?.length) {
+        set({ dateHistories: [] }); // Set empty array for no plans
+        return;
+      }
+
       set({ dateHistories: response.data.datePlans || [] });
     } catch (error) {
-      console.error("Error fetching date plans:", error);
-      Alert.alert("Error", "Failed to fetch date plans. Please try again.");
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Handle 404 (Not Found) as empty date plans
+        set({ dateHistories: [] });
+      } else {
+        // Handle other errors
+        console.error("Error fetching date plans:", error);
+        Alert.alert("Error", "Failed to fetch date plans. Please try again.");
+      }
     }
   },
 
@@ -58,29 +71,52 @@ export const useDateStore = create<DateState>((set, get) => ({
     }
   },
 
-  // Set a date plan as favorite
+  fetchAllDatePlans: async () => {
+    try {
+      const token = await SecureStore.getItemAsync("token");
+      const userId = await SecureStore.getItemAsync("userId");
+      console.log("Fetching plans with token:", token, "userId:", userId);
+
+      const response = await axios.get("http://localhost:3000/date-plans", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("API Response:", response.data);
+
+      set({ dateHistories: response.data.datePlans || [] });
+      console.log("Updated store state:", get().dateHistories);
+    } catch (error) {
+      console.error("Error fetching all date plans:", error);
+      Alert.alert("Error", "Failed to fetch date plans. Please try again.");
+    }
+  },
+
   setFavorite: async (datePlanId: string, isFavorite: boolean) => {
     try {
-      await axios.patch(`http://localhost:3000/date-plans/${datePlanId}`, {
-        isFavourite: isFavorite,
-      });
+      const token = await SecureStore.getItemAsync("token");
+      await axios.post(
+        `http://localhost:3000/date-plans/${datePlanId}/toggle-favorite`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const { datePlans, dateHistories } = get();
-
-      // Update the favorite status in the state
+      // Update local state
+      const { dateHistories } = get();
       set({
-        datePlans: datePlans.map((plan) =>
-          plan._id === datePlanId ? { ...plan, isFavourite: isFavorite } : plan
-        ),
         dateHistories: dateHistories.map((history) =>
           history.id === datePlanId
-            ? { ...history, isFavorite: isFavorite }
+            ? { ...history, isFavorite: !history.isFavorite }
             : history
         ),
       });
     } catch (error) {
-      console.error("Error updating favorite status:", error);
-      throw error;
+      console.error("Error toggling favorite:", error);
+      Alert.alert("Error", "Failed to update favorite status.");
     }
   },
 

@@ -1,8 +1,8 @@
-import 'react-native-get-random-values';
+import "react-native-get-random-values";
 import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import AuthScreen from "@/auth/AuthScreen";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/auth.store";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";

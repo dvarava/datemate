@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Types } from "mongoose";
 
 export type PartnerDocument = Partner & Document;
 
@@ -12,10 +12,10 @@ export class Partner {
   age: number;
 
   @Prop({ required: true })
-  gender: 'Male' | 'Female';
+  gender: "Male" | "Female";
 
   @Prop({ required: true })
-  personalityType: 'Introvert' | 'Extrovert';
+  personalityType: "Introvert" | "Extrovert";
 
   @Prop({ required: true })
   interests: string[];
@@ -23,7 +23,10 @@ export class Partner {
   @Prop({ type: [String], default: null })
   dietaryPreferences?: string[] | null;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: [String], required: true })
+  avatarGradient: string[];
+
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
   userId: Types.ObjectId;
 }
 

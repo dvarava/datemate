@@ -21,7 +21,7 @@ import Dropdown from "@/components/Dropdown";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { usePartnerStore } from "@/store/partner.store";
 import { Partner } from "../../../store/types/partner";
-import { useDateStore } from "@/store/dateStore";
+import { useDateStore } from "@/store/date.store";
 
 const dietIcons = {
   Vegan: require("@/assets/diet_icons/vegan.png"),
@@ -70,7 +70,9 @@ const PartnerDetailsScreen: React.FC = () => {
       console.log("Date Histories:", dateHistories);
       setPartnerName(partner.name);
       setPartnerAge(partner.age.toString());
-      setPartnerPersonality(partner.personalityType as "Introvert" | "Extrovert");
+      setPartnerPersonality(
+        partner.personalityType as "Introvert" | "Extrovert"
+      );
       setPartnerLoves(partner.interests);
       setSelectedDiet(partner.dietaryPreferences || []);
     }
