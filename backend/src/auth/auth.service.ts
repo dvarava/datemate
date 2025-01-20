@@ -11,24 +11,34 @@ export class AuthService {
   ) {}
 
   private generateToken(user: any) {
-    return this.jwtService.sign({
-      sub: user._id,
+    console.log("Generating token for user:", user);
+    const payload = {
+      sub: user._id.toString(),
       email: user.email,
-    });
+    };
+    console.log("Token payload:", payload);
+    const token = this.jwtService.sign(payload);
+    console.log("Generated token:", token);
+    return token;
   }
 
   async handleAppleLogin(token: string) {
     const decodedToken = jwt.decode(token) as any;
+    console.log("Decoded Apple token:", decodedToken);
     let email = decodedToken.email || null;
     let existingUser = await this.usersService.findByEmail(email);
+    console.log("Found/Created user:", existingUser);
 
     if (existingUser) {
       const accessToken = this.generateToken(existingUser);
+      console.log("Generated token for existing user:", accessToken);
       return { user: existingUser, accessToken };
     }
 
     const newUser = await this.usersService.createUser({ email });
+    console.log("Created new user:", newUser);
     const accessToken = this.generateToken(newUser);
+    console.log("Generated token for new user:", accessToken);
     return { user: newUser, accessToken };
   }
 

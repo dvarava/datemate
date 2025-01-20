@@ -21,7 +21,6 @@ export class DatePlanService {
   async createDatePlan(
     data: DatePlanInput
   ): Promise<{ datePlan: DatePlanDocument; activities: ActivityDocument[] }> {
-    // Fetch partner details first
     const partner = await this.partnerModel.findById(data.partnerId);
     if (!partner) {
       throw new NotFoundException(
@@ -93,7 +92,7 @@ export class DatePlanService {
     );
 
     const datePlan = new this.datePlanModel({
-      partnerId: data.partnerId,
+      partnerId: new Types.ObjectId(data.partnerId),
       partnerName: partner.name,
       numberOfActivities: data.activityAmount,
       location: data.locationAddress,
@@ -301,18 +300,39 @@ export class DatePlanService {
     try {
       console.log("Getting plans for userId:", userId);
 
-      const userPartners = await this.partnerModel
-        .find({ userId: new Types.ObjectId(userId) })
-        .exec();
-      console.log("Found partners:", userPartners);
+      // Log the query we're about to execute
+      console.log("Partner query:", { userId: new Types.ObjectId(userId) });
 
-      if (!userPartners || userPartners.length === 0) {
-        console.log("No partners found for user");
-        return [];
-      }
+      // Add pre-query validation
+      const partnerCount = await this.partnerModel.countDocuments();
+      console.log("Total partners in collection:", partnerCount);
+
+      const userPartners = await this.partnerModel
+        .find({}) // temporarily remove filter to see ALL partners
+        .lean()
+        .exec();
+
+      console.log(
+        "All partners in system:",
+        JSON.stringify(userPartners, null, 2)
+      );
+
+      console.log("Found partners:", JSON.stringify(userPartners, null, 2));
 
       const partnerIds = userPartners.map((partner) => partner._id);
       console.log("Partner IDs:", partnerIds);
+
+      // After getting the partner IDs
+      console.log("Searching for date plans with query:", {
+        partnerId: { $in: partnerIds },
+      });
+
+      // Let's see what's in the date plans collection
+      const allDatePlans = await this.datePlanModel.find({}).lean().exec();
+      console.log(
+        "All date plans in system:",
+        JSON.stringify(allDatePlans, null, 2)
+      );
 
       const datePlans = await this.datePlanModel
         .find({ partnerId: { $in: partnerIds } })
@@ -360,6 +380,12 @@ export class DatePlanService {
       return dateHistories;
     } catch (error) {
       console.error("Error in getAllDatePlans:", error);
+      // Log more details about the error
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
       throw new Error(`Failed to get date plans: ${error.message}`);
     }
   }
