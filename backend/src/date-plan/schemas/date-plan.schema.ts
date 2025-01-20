@@ -38,6 +38,9 @@ export class DatePlan {
   @Prop({ default: false })
   isFavourite: boolean;
 
+  @Prop({ required: true, default: 0 })
+  totalCost: number;
+
   @Prop({ default: Date.now })
   createdAt: Date;
 }

@@ -86,6 +86,12 @@ export class DatePlanService {
       );
     }
 
+    const activities = this.parseActivities(openAiResponse);
+    const totalCost = activities.reduce(
+      (sum, activity) => sum + (activity.cost || 0),
+      0
+    );
+
     const datePlan = new this.datePlanModel({
       partnerId: data.partnerId,
       partnerName: partner.name,
@@ -98,14 +104,14 @@ export class DatePlanService {
       duration: data.duration,
       preferredPlace: data.preference,
       isFavourite: false,
+      totalCost: totalCost,
       createdAt: new Date(),
       __v: 0,
     });
 
     const savedDatePlan = await datePlan.save();
 
-    // Parse and save activities
-    const activities = this.parseActivities(openAiResponse);
+    // Save activities
     for (const activity of activities) {
       const newActivity = new this.activityModel({
         ...activity,
@@ -284,6 +290,7 @@ export class DatePlanService {
           planActivities[0]?.description || "No description available",
         date: plan.createdAt.toISOString().split("T")[0],
         isFavorite: plan.isFavourite,
+        totalCost: plan.totalCost,
       };
     });
 
