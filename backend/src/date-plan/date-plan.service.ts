@@ -237,9 +237,13 @@ export class DatePlanService {
     // Create a date history object for the specific date plan
     const dateHistory = {
       id: datePlan._id,
+      name: datePlan.partnerName,
+      age: partner?.age.toString() || "N/A",
       dateDescription: activities[0]?.description || "No description available",
       date: datePlan.createdAt.toISOString().split("T")[0],
+      avatarGradient: partner?.avatarGradient || ["#ff0262", "#ffffff"],
       isFavorite: datePlan.isFavourite,
+      totalCost: datePlan.totalCost,
     };
 
     return {

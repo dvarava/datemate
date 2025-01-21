@@ -25,7 +25,6 @@ export class DatePlanController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getAllDatePlans(@CurrentUser() user) {
-    console.log("DatePlanController - Received User:", user);
     if (!user || !user.userId) {
       throw new UnauthorizedException("User not properly authenticated");
     }
