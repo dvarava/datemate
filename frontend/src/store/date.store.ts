@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
 import { Partner } from "./types/partner";
 import { Activity, DatePlan, DateHistory } from "./types/date";
+import { verifyAuth, handleAuthError } from "../utils/auth";
 
 interface DateState {
   datePlans: DatePlan[];
@@ -26,8 +26,14 @@ export const useDateStore = create<DateState>((set, get) => ({
 
   fetchDatePlansByPartnerId: async (partnerId: string) => {
     try {
+      const { token } = await verifyAuth();
       const response = await axios.get(
-        `http://localhost:3000/date-plans/partners/${partnerId}`
+        `http://localhost:3000/date-plans/partners/${partnerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       // Check if the response has data but no date plans
@@ -38,22 +44,21 @@ export const useDateStore = create<DateState>((set, get) => ({
 
       set({ dateHistories: response.data.datePlans || [] });
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        // Handle 404 (Not Found) as empty date plans
-        set({ dateHistories: [] });
-      } else {
-        // Handle other errors
-        console.error("Error fetching date plans:", error);
-        Alert.alert("Error", "Failed to fetch date plans. Please try again.");
-      }
+      handleAuthError(error);
     }
   },
 
   // Fetch a specific date plan by ID
   fetchDatePlanById: async (datePlanId: string) => {
     try {
+      const { token } = await verifyAuth();
       const response = await axios.get(
-        `http://localhost:3000/date-plans/${datePlanId}`
+        `http://localhost:3000/date-plans/${datePlanId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log("API Response:", response.data); // Log the API response
 
@@ -66,44 +71,28 @@ export const useDateStore = create<DateState>((set, get) => ({
         dateHistories: [dateHistory], // Store the single date history in an array
       });
     } catch (error) {
-      console.error("Error fetching date plan:", error);
-      Alert.alert("Error", "Failed to fetch date plan. Please try again.");
+      handleAuthError(error);
     }
   },
 
   fetchAllDatePlans: async () => {
     try {
-      const token = await SecureStore.getItemAsync("token");
-      console.log('Stored token:', token);
-      
-      // Decode and log the token content (for debugging only)
-      if (token) {
-        const tokenParts = token.split('.');
-        const payload = JSON.parse(atob(tokenParts[1]));
-        console.log('Decoded token payload:', payload);
-      }
-  
+      const { token } = await verifyAuth();
       const response = await axios.get("http://localhost:3000/date-plans", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       
-      console.log('Response:', response.data);
       set({ dateHistories: response.data || [] });
     } catch (error) {
-      console.error("Error fetching all date plans:", error);
-      if (axios.isAxiosError(error)) {
-        console.log('Response data:', error.response?.data);
-        console.log('Response status:', error.response?.status);
-      }
-      Alert.alert("Error", "Failed to fetch date plans. Please try again.");
+      handleAuthError(error);
     }
   },
 
   setFavorite: async (datePlanId: string, isFavorite: boolean) => {
     try {
-      const token = await SecureStore.getItemAsync("token");
+      const { token } = await verifyAuth();
       await axios.post(
         `http://localhost:3000/date-plans/${datePlanId}/toggle-favorite`,
         {},
@@ -124,36 +113,40 @@ export const useDateStore = create<DateState>((set, get) => ({
         ),
       });
     } catch (error) {
-      console.error("Error toggling favorite:", error);
-      Alert.alert("Error", "Failed to update favorite status.");
+      handleAuthError(error);
     }
   },
 
   // Fetch all partners
   fetchPartners: async () => {
     try {
-      const userId = await SecureStore.getItemAsync("userId");
-      if (!userId) {
-        Alert.alert("Error", "User not authenticated");
-        return;
-      }
-
+      const { userId, token } = await verifyAuth();
       const response = await axios.get(
-        `http://localhost:3000/partners?userId=${userId}`
+        `http://localhost:3000/partners?userId=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       set({ partners: response.data });
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch partners");
-      console.error("Fetch partners error:", error);
+      handleAuthError(error);
     }
   },
 
   // Create a new date plan
   createDatePlan: async (data: any) => {
     try {
+      const { token } = await verifyAuth();
       const response = await axios.post(
         "http://localhost:3000/date-plans",
-        data
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       set({
         datePlans: [response.data.datePlan],
@@ -161,7 +154,7 @@ export const useDateStore = create<DateState>((set, get) => ({
       });
       console.log("Generated Date Plan:", response.data);
     } catch (error) {
-      console.error("Error generating date plan:", error);
+      handleAuthError(error);
       throw error;
     }
   },

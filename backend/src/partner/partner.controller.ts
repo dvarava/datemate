@@ -1,9 +1,11 @@
-import { Controller, Post, Get, Body, Query, Delete, Param, Patch, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Delete, Param, Patch, BadRequestException, UseGuards } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import { Types } from 'mongoose';
-
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @Controller('partners')
+@UseGuards(JwtAuthGuard)
+
 export class PartnerController {
   constructor(private readonly partnerService: PartnerService) {}
 

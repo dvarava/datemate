@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import * as SecureStore from "expo-secure-store";
 import { Alert } from "react-native";
 import { Partner, PartnerInput } from "./types/partner";
+import { verifyAuth, handleAuthError } from "../utils/auth";
 
 type PartnerState = {
   partners: Partner[];
@@ -20,14 +20,7 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
 
   addPartner: async (partner: PartnerInput) => {
     try {
-      const userId = await SecureStore.getItemAsync("userId");
-      const token = await SecureStore.getItemAsync("token");
-
-      if (!userId || !token) {
-        Alert.alert("Error", "User not authenticated");
-        return;
-      }
-
+      const { userId, token } = await verifyAuth();
       const response = await fetch("http://localhost:3000/partners", {
         method: "POST",
         headers: {
@@ -46,21 +39,13 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
         partners: [...state.partners, newPartner],
       }));
     } catch (error) {
-      Alert.alert("Error", "Failed to add partner");
-      console.error("Add partner error:", error);
+      handleAuthError(error);
     }
   },
 
   fetchPartners: async () => {
     try {
-      const userId = await SecureStore.getItemAsync("userId");
-      const token = await SecureStore.getItemAsync("token");
-
-      if (!userId || !token) {
-        Alert.alert("Error", "User not authenticated");
-        return;
-      }
-
+      const { userId, token } = await verifyAuth();
       const response = await fetch(
         `http://localhost:3000/partners?userId=${userId}`,
         {
@@ -78,8 +63,7 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
       const partners = await response.json();
       set({ partners });
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch partners");
-      console.error("Fetch partners error:", error);
+      handleAuthError(error);
     }
   },
 
@@ -90,13 +74,7 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
 
   editPartner: async (partnerId: string, partnerData: Partial<Partner>) => {
     try {
-      const token = await SecureStore.getItemAsync("token");
-
-      if (!token) {
-        Alert.alert("Error", "User not authenticated");
-        return;
-      }
-
+      const { token } = await verifyAuth();
       const response = await fetch(
         `http://localhost:3000/partners/${partnerId}`,
         {
@@ -120,20 +98,13 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
         ),
       }));
     } catch (error) {
-      Alert.alert("Error", "Failed to edit partner");
-      console.error("Edit partner error:", error);
+      handleAuthError(error);
     }
   },
 
   deletePartner: async (partnerId: string) => {
     try {
-      const token = await SecureStore.getItemAsync("token");
-
-      if (!token) {
-        Alert.alert("Error", "User not authenticated");
-        return;
-      }
-
+      const { token } = await verifyAuth();
       const response = await fetch(
         `http://localhost:3000/partners/${partnerId}`,
         {
@@ -152,8 +123,7 @@ export const usePartnerStore = create<PartnerState>((set, get) => ({
         partners: state.partners.filter((p) => p._id !== partnerId),
       }));
     } catch (error) {
-      Alert.alert("Error", "Failed to delete partner");
-      console.error("Delete partner error:", error);
+      handleAuthError(error);
     }
   },
 }));

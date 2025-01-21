@@ -14,6 +14,7 @@ import { CurrentUser } from "src/auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @Controller("date-plans")
+@UseGuards(JwtAuthGuard)
 export class DatePlanController {
   constructor(private readonly datePlanService: DatePlanService) {}
 
@@ -23,7 +24,6 @@ export class DatePlanController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   async getAllDatePlans(@CurrentUser() user) {
     console.log("DatePlanController - Received User:", user);
     if (!user || !user.userId) {
