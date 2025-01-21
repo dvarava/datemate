@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, Query, Delete, Param, Patch, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Delete, Param, Patch, BadRequestException, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('partners')
 @UseGuards(JwtAuthGuard)
@@ -15,8 +16,11 @@ export class PartnerController {
   }
 
   @Get()
-  async getPartners(@Query('userId') userId: string) {
-    return this.partnerService.findPartnersByUser(userId);
+  async getPartners(@CurrentUser() user) {
+    if (!user || !user.userId) {
+      throw new UnauthorizedException("User not properly authenticated");
+    }
+    return this.partnerService.findPartnersByUser(user.userId);
   }
 
   @Delete(':partnerId')

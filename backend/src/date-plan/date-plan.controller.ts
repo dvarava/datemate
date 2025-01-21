@@ -46,27 +46,44 @@ export class DatePlanController {
   }
 
   @Get(":id")
-  async getDatePlanById(@Param("id") id: string) {
+  async getDatePlanById(@Param("id") id: string, @CurrentUser() user) {
+    if (!user || !user.userId) {
+      throw new UnauthorizedException("User not properly authenticated");
+    }
     try {
-      const result = await this.datePlanService.getDatePlanById(id);
+      const result = await this.datePlanService.getDatePlanById(id, user.userId);
       return result;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new UnauthorizedException(error.message);
       }
       throw error;
     }
   }
 
   @Get("partners/:partnerId")
-  async getDatePlansByPartnerId(@Param("partnerId") partnerId: string) {
+  async getDatePlansByPartnerId(
+    @Param("partnerId") partnerId: string,
+    @CurrentUser() user
+  ) {
+    if (!user || !user.userId) {
+      throw new UnauthorizedException("User not properly authenticated");
+    }
     try {
-      const datePlans =
-        await this.datePlanService.getDatePlansByPartnerId(partnerId);
+      const datePlans = await this.datePlanService.getDatePlansByPartnerId(
+        partnerId,
+        user.userId
+      );
       return { datePlans };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      }
+      if (error instanceof UnauthorizedException) {
+        throw new UnauthorizedException(error.message);
       }
       throw error;
     }

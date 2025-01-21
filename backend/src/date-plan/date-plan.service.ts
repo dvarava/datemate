@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
@@ -219,7 +219,7 @@ export class DatePlanService {
     return initialPrompt;
   }
 
-  async getDatePlanById(id: string) {
+  async getDatePlanById(id: string, userId: string) {
     // Fetch the specific date plan by ID
     const datePlan = await this.datePlanModel.findById(id).exec();
     if (!datePlan) {
@@ -228,6 +228,14 @@ export class DatePlanService {
 
     // Fetch the associated partner
     const partner = await this.partnerModel.findById(datePlan.partnerId).exec();
+    if (!partner) {
+      throw new NotFoundException(`Partner not found for this date plan`);
+    }
+
+    // Verify that the partner belongs to the current user
+    if (partner.userId.toString() !== userId) {
+      throw new UnauthorizedException("You don't have permission to view this date plan");
+    }
 
     // Fetch activities for the specific date plan
     const activities = await this.activityModel
@@ -249,8 +257,19 @@ export class DatePlanService {
     };
   }
 
-  async getDatePlansByPartnerId(partnerId: string) {
+  async getDatePlansByPartnerId(partnerId: string, userId: string) {
     const partnerObjectId = new Types.ObjectId(partnerId);
+    
+    // First verify that the partner belongs to the current user
+    const partner = await this.partnerModel.findById(partnerObjectId);
+    if (!partner) {
+      throw new NotFoundException(`Partner not found with id ${partnerId}`);
+    }
+
+    if (partner.userId.toString() !== userId) {
+      throw new UnauthorizedException("You don't have permission to view this partner's date plans");
+    }
+
     // Get all date plans for the partner, sorted by creation date
     const datePlans = await this.datePlanModel
       .find({ partnerId: partnerObjectId })
@@ -258,15 +277,7 @@ export class DatePlanService {
       .exec();
 
     if (!datePlans || datePlans.length === 0) {
-      throw new NotFoundException(
-        `No date plans found for partner ${partnerId}`
-      );
-    }
-
-    // Fetch the partner details
-    const partner = await this.partnerModel.findById(partnerObjectId);
-    if (!partner) {
-      throw new NotFoundException(`Partner not found with id ${partnerId}`);
+      return [];
     }
 
     // Get activities for all date plans
@@ -301,92 +312,63 @@ export class DatePlanService {
     try {
       console.log("Getting plans for userId:", userId);
 
-      // Log the query we're about to execute
-      console.log("Partner query:", { userId: new Types.ObjectId(userId) });
-
-      // Add pre-query validation
-      const partnerCount = await this.partnerModel.countDocuments();
-      console.log("Total partners in collection:", partnerCount);
-
+      // Find all partners belonging to the specific user
       const userPartners = await this.partnerModel
-        .find({}) // temporarily remove filter to see ALL partners
+        .find({ userId: new Types.ObjectId(userId) })
         .lean()
         .exec();
 
-      console.log(
-        "All partners in system:",
-        JSON.stringify(userPartners, null, 2)
-      );
+      console.log("Found partners for user:", JSON.stringify(userPartners, null, 2));
 
-      console.log("Found partners:", JSON.stringify(userPartners, null, 2));
+      if (!userPartners || userPartners.length === 0) {
+        console.log("No partners found for user");
+        return [];
+      }
 
-      const partnerIds = userPartners.map((partner) => partner._id);
+      const partnerIds = userPartners.map(partner => partner._id);
       console.log("Partner IDs:", partnerIds);
 
-      // After getting the partner IDs
-      console.log("Searching for date plans with query:", {
-        partnerId: { $in: partnerIds },
-      });
-
-      // Let's see what's in the date plans collection
-      const allDatePlans = await this.datePlanModel.find({}).lean().exec();
-      console.log(
-        "All date plans in system:",
-        JSON.stringify(allDatePlans, null, 2)
-      );
-
+      // Get date plans only for the user's partners
       const datePlans = await this.datePlanModel
-        .find({ partnerId: { $in: partnerIds.map(id => new Types.ObjectId(id.toString())) } })
+        .find({ partnerId: { $in: partnerIds } })
         .sort({ createdAt: -1 })
         .exec();
-      console.log("Found date plans:", datePlans);
 
       if (!datePlans || datePlans.length === 0) {
-        console.log("No date plans found for partners");
+        console.log("No date plans found for user's partners");
         return [];
       }
 
       const allActivities = await this.activityModel
         .find({
-          datePlanId: { $in: datePlans.map((plan) => plan._id) },
+          datePlanId: { $in: datePlans.map(plan => plan._id) }
         })
         .exec();
-      console.log("Found activities:", allActivities);
 
       const partnersMap = new Map(
-        userPartners.map((partner) => [partner._id.toString(), partner])
+        userPartners.map(partner => [partner._id.toString(), partner])
       );
 
-      const dateHistories = datePlans.map((plan) => {
+      const dateHistories = datePlans.map(plan => {
         const planActivities = allActivities.filter(
-          (activity) => activity.datePlanId?.toString() === plan._id?.toString()
+          activity => activity.datePlanId?.toString() === plan._id?.toString()
         );
         const partner = partnersMap.get(plan.partnerId.toString());
 
-        const history = {
+        return {
           id: plan._id,
           name: plan.partnerName,
           age: partner?.age?.toString() || "N/A",
-          dateDescription:
-            planActivities[0]?.description || "No description available",
+          dateDescription: planActivities[0]?.description || "No description available",
           date: plan.createdAt?.toISOString().split("T")[0] || "N/A",
           isFavorite: plan.isFavourite || false,
-          partnerId: plan.partnerId,
+          partnerId: plan.partnerId
         };
-        console.log("Created history object:", history);
-        return history;
       });
 
-      console.log("Returning date histories:", dateHistories);
       return dateHistories;
     } catch (error) {
       console.error("Error in getAllDatePlans:", error);
-      // Log more details about the error
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
       throw new Error(`Failed to get date plans: ${error.message}`);
     }
   }

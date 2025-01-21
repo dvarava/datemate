@@ -16,6 +16,7 @@ interface DateState {
   fetchPartners: () => Promise<void>;
   setFavorite: (datePlanId: string, isFavorite: boolean) => Promise<void>;
   createDatePlan: (data: any) => Promise<void>;
+  fetchFavoriteDatePlans: () => Promise<void>;
 }
 
 export const useDateStore = create<DateState>((set, get) => ({
@@ -156,6 +157,33 @@ export const useDateStore = create<DateState>((set, get) => ({
     } catch (error) {
       handleAuthError(error);
       throw error;
+    }
+  },
+
+  fetchFavoriteDatePlans: async () => {
+    try {
+      const { token } = await verifyAuth();
+      const response = await axios.get("http://localhost:3000/date-plans", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Filter only favorite date plans
+      const favoritePlans = response.data.filter(
+        (plan: DatePlan) => plan.isFavourite === true
+      );
+      set({ dateHistories: favoritePlans });
+    } catch (error) {
+      console.error("Error fetching favorite date plans:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("Response data:", error.response?.data);
+        console.log("Response status:", error.response?.status);
+      }
+      Alert.alert(
+        "Error",
+        "Failed to fetch favorite date plans. Please try again."
+      );
     }
   },
 }));
