@@ -7,16 +7,17 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "sdkVersion": "51.0.0",
+    "sdkVersion": "52.0.0",
+    "newArchEnabled": true,
     "platforms": [
       "ios",
       "android",
       "web"
     ],
     "splash": {
-      "image": "./assets/splash.png",
+      "backgroundColor": "#000000",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splash.png"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -38,7 +39,8 @@
     "plugins": [
       "expo-router",
       "expo-apple-authentication",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -48,11 +50,6 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
-    },
-    "splash": {
-      "backgroundColor": "#000000",
-      "resizeMode": "contain",
-      "image": "./assets/splash.png"
     }
   }
 }

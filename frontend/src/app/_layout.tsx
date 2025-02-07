@@ -7,6 +7,8 @@ import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ActivityIndicator, View } from "react-native";
+import { enableScreens } from 'react-native-screens';
+
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -59,5 +61,5 @@ const RootNavigation = () => {
     </Stack>
   );
 };
-
+enableScreens();
 export default App;
