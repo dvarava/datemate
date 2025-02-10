@@ -19,6 +19,7 @@ import HomeCalendar from "@/components/HomeCalendar";
 import * as Notifications from "expo-notifications";
 import RobotSvg from "@/svg/robot";
 import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface HolidayInfo {
   name: string;
@@ -134,7 +135,7 @@ const RegularCard: React.FC<CardProps> = ({ children, style }) => (
 );
 
 const HomeScreen = () => {
-  const { logout } = useAuthStore();
+  const { logout } = useAuth();
   const router = useRouter();
   const navigateBlocked = useRef(false);
   const [isNotified, setIsNotified] = useState(false);
@@ -398,9 +399,7 @@ const HomeScreen = () => {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Button
           title="Logout"
-          onPress={() => {
-            logout();
-          }}
+          onPress={logout}
         />
       </View>
     </ScrollView>

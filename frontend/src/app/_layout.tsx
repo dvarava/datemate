@@ -1,14 +1,15 @@
 import 'react-native-get-random-values';
-import React, { useEffect } from "react";
+import React from "react";
 import { Stack } from "expo-router";
 import AuthScreen from "@/auth/AuthScreen";
-import { useAuthStore } from "@/store/authStore";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ActivityIndicator, View } from "react-native";
 import { enableScreens } from 'react-native-screens';
+import AuthProvider, { useAuth } from '@/providers/AuthProvider';
 
+enableScreens();
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -18,33 +19,39 @@ const App = () => {
     "Nunito-Italic": require("assets/fonts/Nunito-Italic.ttf"),
   });
 
-  const { isAuthenticated, validateSession } = useAuthStore();
-
-  useEffect(() => {
-    validateSession();
-  }, []);
-
-  if (!fontsLoaded || isAuthenticated === null) {
+  if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
 
-  // return isAuthenticated ? (
-  //   <SafeAreaProvider>
-  //     <RootNavigation />
-  //     <StatusBar style="auto" />
-  //   </SafeAreaProvider>
-  // ) : (
-  //   <AuthScreen />
-  // );
-  return  (
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+};
+
+const AppContent = () => {
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return session ? (
     <SafeAreaProvider>
       <RootNavigation />
       <StatusBar style="auto" />
     </SafeAreaProvider>
+  ) : (
+    <AuthScreen />
   );
 };
 
@@ -61,5 +68,5 @@ const RootNavigation = () => {
     </Stack>
   );
 };
-enableScreens();
+
 export default App;

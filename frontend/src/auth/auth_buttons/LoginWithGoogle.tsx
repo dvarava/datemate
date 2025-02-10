@@ -1,36 +1,24 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { StyleSheet, Text, TouchableOpacity, Image } from "react-native";
-import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
-import { useAuthStore } from "@/store/authStore";
 import { colors } from "@/constants/tokens";
+import { googleSignIn } from "../google-sign-in";
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+} from "@react-native-google-signin/google-signin";
 
-const webClientId =
-  "488836930557-abivotpv3q8t8iqkm07ai976jm5ahaph.apps.googleusercontent.com";
-const iosClientId =
-  "488836930557-d61hts76ruifk9722k8updijfkam2l7f.apps.googleusercontent.com";
-const androidClientId =
-  "488836930557-plah1vg3k9a525b8hs97tjlii783m2t0.apps.googleusercontent.com";
-
-WebBrowser.maybeCompleteAuthSession();
+GoogleSignin.configure({
+  webClientId: "488836930557-dsk3c9jcemvtnf7mi1j0hbt188dpn0qb.apps.googleusercontent.com",
+  scopes: ["profile", "email"],
+  offlineAccess: true,
+  forceCodeForRefreshToken: false,
+  iosClientId: "488836930557-21ah4dbf3ctbf8n5fpa9n9v7a59plqgj.apps.googleusercontent.com",
+});
 
 const LoginWithGoogle = () => {
-  const { setAuthFromGoogle } = useAuthStore();
-
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId,
-    iosClientId,
-    androidClientId,
-  });
-
-  useEffect(() => {
-    if (response?.type === "success" && response.authentication?.accessToken) {
-      setAuthFromGoogle(response.authentication.accessToken);
-    }
-  }, [response]);
-
+  
   return (
-    <TouchableOpacity style={styles.wrapper} onPress={() => promptAsync()}>
+    <TouchableOpacity style={styles.wrapper} onPress={googleSignIn}>
       <Image source={require("assets/google-logo.png")} style={styles.brand} />
       <Text style={styles.txt}>Sign in with Google</Text>
     </TouchableOpacity>

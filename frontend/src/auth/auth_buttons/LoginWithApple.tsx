@@ -1,25 +1,49 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, Image, Platform } from "react-native";
-import { useAuthStore } from "@/store/authStore";
+import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
+import { Platform } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
+import { supabase } from "@/lib/supabase";
 import { colors } from "@/constants/tokens";
 
-const LoginWithApple = () => {
-  const loginWithApple = useAuthStore((state) => state.loginWithApple);
+export function LoginWithApple() {
+  if (Platform.OS === "ios")
+    return (
+      <TouchableOpacity
+        style={styles.customButton}
+        onPress={async () => {
+          try {
+            const credential = await AppleAuthentication.signInAsync({
+              requestedScopes: [
+                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+              ],
+            });
+            
+            if (credential.identityToken) {
+              // Add debug logging
+              console.log('Apple ID Token:', credential.identityToken);
+              
+              const response = await supabase.auth.signInWithIdToken({
+                provider: "apple",
+                token: credential.identityToken,
+              });
+              console.log("Supabase response:", response);
+            }
+          } catch (e) {
+            console.error('Authentication error:', e);
+          }
+        }}
+      >
+        <Image
+          source={require("assets/apple-logo.png")}
+          style={styles.appleLogo}
+        />
+        <Text style={styles.customButtonText}>Sign in with Apple</Text>
+      </TouchableOpacity>
+    );
+  
+  return null; // Return null for non-iOS platforms
+}
 
-  if (Platform.OS !== "ios") {
-    return null;
-  }
-
-  return (
-    <TouchableOpacity style={styles.customButton} onPress={loginWithApple}>
-      <Image
-        source={require("assets/apple-logo.png")}
-        style={styles.appleLogo}
-      />
-      <Text style={styles.customButtonText}>Sign in with Apple</Text>
-    </TouchableOpacity>
-  );
-};
 const styles = StyleSheet.create({
   customButton: {
     flexDirection: "row",
